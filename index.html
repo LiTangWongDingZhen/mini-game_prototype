@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EduGenAI (PolyU) — Mini-Game Prototypes</title>
+<meta name="description" content="Homepage for the PolyU EduGenAI COMP5241 mini-game prototypes: Gold Rush Hook (SDLC learning game) and 測試工程師與酒吧 (animated SVG story).">
+<style>
+  /* ---------- PolyU EduGenAI 品牌風格（EDUGENAI-README §1） ---------- */
+  :root{
+    --primary:#A21942;          /* Primary (PolyU Brick Red) */
+    --primary-hover:#801333;
+    --ink:#262626;              /* Secondary (Dark Slate/Charcoal) */
+    --bg:#F8F9FA;               /* Background Accent (Light Grey) */
+    --line:#E5E7EB;             /* Card Borders / Dividers */
+    --muted:#6B7280;
+    --muted-2:#4B5563;
+    --green:#10B981;            /* Success / Progress Green */
+    --green-dark:#047857;       /* green TEXT on white (4.5:1 safe) */
+    --radius:14px;
+  }
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; min-height:100vh; color:var(--ink); background:var(--bg);
+    font-family:Inter,system-ui,-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    display:flex; flex-direction:column;
+  }
+  a{ color:inherit; text-decoration:none; }
+  :focus-visible{ outline:2px solid var(--primary); outline-offset:3px; border-radius:6px; }
+
+  /* ---------- Brand bar ---------- */
+  .brandbar{ background:var(--primary); color:#fff; border-bottom:1px solid rgba(0,0,0,.10); }
+  .brandbar-inner{
+    max-width:80rem; margin:0 auto; padding:14px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .brand-left{ display:flex; align-items:center; gap:12px; min-width:0; }
+  .brand-badge{
+    display:inline-flex; align-items:center; gap:8px; flex:none;
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.24);
+    padding:7px 13px; border-radius:9px; font-weight:700; font-size:13px; letter-spacing:.02em;
+  }
+  .brand-badge svg{ width:18px; height:18px; }
+  .brand-name{ font-size:15px; font-weight:600; line-height:1.2; }
+  .brand-name small{ display:block; font-size:11px; font-weight:500; opacity:.82; letter-spacing:.04em; }
+  .brand-right{ font-size:12px; font-weight:700; letter-spacing:.1em; opacity:.92; white-space:nowrap; }
+
+  /* ---------- Layout ---------- */
+  .wrap{ max-width:80rem; margin:0 auto; padding:0 16px; width:100%; }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding:54px 0 26px; text-align:center; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--green-dark); background:#ECFDF5; border:1px solid #A7F3D0;
+    padding:6px 14px; border-radius:999px; margin-bottom:20px;
+  }
+  .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:var(--green); }
+  .hero h1{
+    margin:0 0 16px; font-size:clamp(30px,5.2vw,48px); font-weight:800;
+    letter-spacing:-.02em; line-height:1.05;
+  }
+  .hero h1 .accent{ color:var(--primary); }
+  .hero p{
+    margin:0 auto; max-width:660px; font-size:clamp(15px,2vw,18px);
+    line-height:1.65; color:var(--muted-2);
+  }
+
+  /* ---------- Cards ---------- */
+  .cards{ display:grid; grid-template-columns:1fr; gap:22px; padding:16px 0 6px; }
+  @media(min-width:840px){ .cards{ grid-template-columns:1fr 1fr; align-items:stretch; } }
+
+  .card{
+    position:relative; display:flex; flex-direction:column;
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    overflow:hidden;
+  }
+  .card::before{
+    content:""; position:absolute; inset:0 0 auto 0; height:4px;
+    background:var(--accent); transform:scaleX(.32); transform-origin:left; opacity:.95;
+    transition:transform .28s ease;
+  }
+  .card:hover, .card:focus-visible{
+    transform:translateY(-5px);
+    border-color:var(--accent);
+    box-shadow:0 18px 34px -14px rgba(162,25,66,.30);
+  }
+  .card:hover::before, .card:focus-visible::before{ transform:scaleX(1); }
+  .card--gold{ --accent:#B45309; --chip-bg:#FEF3C7; --chip-fg:#B45309; }
+  .card--bar{ --accent:#A21942; --chip-bg:#F9E3EB; --chip-fg:#A21942; }
+
+  .card-top{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }
+  .icon-chip{
+    width:56px; height:56px; border-radius:16px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--chip-bg); color:var(--chip-fg);
+  }
+  .icon-chip svg{ width:28px; height:28px; }
+  .card-kicker{ font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .card-title{ margin:3px 0 0; font-size:21px; font-weight:700; letter-spacing:-.01em; }
+  .card-sub{ margin:3px 0 0; font-size:13px; color:var(--muted); }
+
+  .card-desc{ margin:0 0 18px; font-size:15px; line-height:1.65; color:var(--muted-2); flex:1; }
+
+  .tags{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+  .tag{
+    font-size:12px; font-weight:600; color:var(--muted-2);
+    background:#F3F4F6; border:1px solid var(--line);
+    padding:5px 11px; border-radius:999px;
+  }
+
+  .card-cta{
+    display:inline-flex; align-items:center; justify-content:center; gap:9px;
+    min-height:48px; padding:12px 20px; border-radius:10px;
+    background:var(--primary); color:#fff; font-size:15px; font-weight:600;
+    transition:background-color .18s ease;
+  }
+  .card-cta svg{ width:18px; height:18px; transition:transform .18s ease; }
+  .card:hover .card-cta svg{ transform:translateX(4px); }
+  .card-cta:hover{ background:var(--primary-hover); }
+  .card-note{ margin:14px 0 0; font-size:12.5px; color:var(--muted); display:flex; align-items:flex-start; gap:7px; line-height:1.5; }
+  .card-note svg{ width:15px; height:15px; flex:none; margin-top:1px; }
+  .card-note code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:#F3F4F6; border:1px solid var(--line); border-radius:6px;
+    padding:1px 6px; font-size:12px; color:var(--ink);
+  }
+
+  /* ---------- How to run ---------- */
+  .run{
+    margin:34px 0 0; background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px 26px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .run h2{ margin:0 0 6px; font-size:16px; font-weight:700; display:flex; align-items:center; gap:9px; }
+  .run h2 svg{ width:19px; height:19px; color:var(--primary); }
+  .run > p{ margin:0 0 18px; font-size:13.5px; color:var(--muted); }
+  .run-grid{ display:grid; grid-template-columns:1fr; gap:14px; }
+  @media(min-width:840px){ .run-grid{ grid-template-columns:1fr 1fr; } }
+  .run-item{ border:1px solid var(--line); border-radius:10px; padding:16px 18px; background:#FAFAFB; }
+  .run-item .lbl{ font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .run-item pre{
+    margin:0 0 10px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13px; color:var(--ink); background:#fff; border:1px solid var(--line);
+    border-radius:8px; padding:11px 13px; line-height:1.55; overflow-x:auto;
+  }
+  .run-item .out{ font-size:12.5px; color:var(--muted); }
+  .run-item .out a{ color:var(--primary); font-weight:700; }
+
+  /* ---------- Footer ---------- */
+  footer{ margin-top:auto; }
+  .foot-inner{
+    max-width:80rem; margin:0 auto; padding:22px 16px 30px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    border-top:1px solid var(--line);
+  }
+  .foot-inner .l{ font-size:13px; color:var(--muted); }
+  .foot-inner .r{ font-size:13px; color:var(--muted); display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  .foot-inner .r .good{ color:var(--green-dark); font-weight:700; }
+  .foot-inner .r .bad{ color:var(--primary); font-weight:700; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+    .card:hover{ transform:none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Brand bar -->
+  <div class="brandbar">
+    <div class="brandbar-inner">
+      <div class="brand-left">
+        <span class="brand-badge" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+          EduGenAI
+        </span>
+        <span class="brand-name">PolyU · GenAI-Powered SE Platform<small>COMP5241 · Mini-Game Prototypes</small></span>
+      </div>
+      <span class="brand-right">PROTOTYPE</span>
+    </div>
+  </div>
+
+  <main class="wrap" style="flex:1;">
+    <!-- Hero -->
+    <section class="hero">
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span> Two interactive prototypes</span>
+      <h1>Learn software engineering<br>by <span class="accent">playing</span>.</h1>
+      <p>A pair of gamified prototypes for the PolyU EduGenAI platform — one teaches the
+         Software Development Lifecycle through a hook-and-reel game, the other tells a
+         23-scene comedy about a tester who orders the impossible.</p>
+    </section>
+
+    <!-- Cards -->
+    <section class="cards" aria-label="Prototypes">
+
+      <!-- Gold Rush Hook -->
+      <a class="card card--gold" href="http://localhost:3000" target="_blank" rel="noopener"
+         aria-label="Open Gold Rush Hook, the SDLC learning game (runs on localhost:3000)">
+        <div class="card-top">
+          <span class="icon-chip" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 12.5-8 8a2.119 2.119 0 1 1-3-3l8-8"/><path d="M15.5 15.5 19 12"/><path d="M19.5 4.5 21 3l-4.5-1.5L12 6l3 3 4.5-4.5Z"/></svg>
+          </span>
+          <div>
+            <div class="card-kicker">SDLC Learning Game</div>
+            <h2 class="card-title">Gold Rush Hook</h2>
+            <p class="card-sub">Next.js · Canvas 2D · Zustand</p>
+          </div>
+        </div>
+        <p class="card-desc">
+          A Gold Miner–style game about the Software Development Lifecycle. Aim the hook,
+          reel in the SDLC <strong>DO's</strong> for marks, dodge the <strong>DON'Ts</strong>,
+          and spend your winnings on upgrades across three levels.
+        </p>
+        <div class="tags">
+          <span class="tag">DO's = gold</span>
+          <span class="tag">3 levels</span>
+          <span class="tag">Shop &amp; upgrades</span>
+          <span class="tag">Web Audio SFX</span>
+        </div>
+        <span class="card-cta">
+          Play the game
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
+        <p class="card-note">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>Runs as a Next.js app — start it with <code>npm run dev</code> in <code>gold_hook/</code>.</span>
+        </p>
+      </a>
+
+      <!-- Testers & the Bar -->
+      <a class="card card--bar" href="bar_animation/testers-bar-polyu.html" target="_blank" rel="noopener"
+         aria-label="Open 測試工程師與酒吧, the animated SVG story (23 scenes)">
+        <div class="card-top">
+          <span class="icon-chip" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.44.5-3 .5"/><path d="M17 8c-1 0-1.44.5-3 .5S12.56 8 11.5 8c-1.64 0-1.64.5-3.28.5C7.56 8.5 7 8 5.5 8 4.12 8 3 9.12 3 10.5v8A2.5 2.5 0 0 0 5.5 21h8a2.5 2.5 0 0 0 2.5-2.5v-8C16 9.12 14.88 8 13.5 8"/></svg>
+          </span>
+          <div>
+            <div class="card-kicker">Animated Story</div>
+            <h2 class="card-title">測試工程師與酒吧</h2>
+            <p class="card-sub">Testers &amp; the Bar · 23 scenes</p>
+          </div>
+        </div>
+        <p class="card-desc">
+          A 23-scene animated SVG comedy about a tester who walks into a bar and orders the
+          impossible — 999999999 beers, −1 pints, a lizard, and a bowl of 錕斤拷.
+          Zero dependencies, fully self-contained.
+        </p>
+        <div class="tags">
+          <span class="tag">23 scenes</span>
+          <span class="tag">Dynamic SVG</span>
+          <span class="tag">QA-tested</span>
+          <span class="tag">Zero deps</span>
+        </div>
+        <span class="card-cta">
+          Watch the story
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
+        <p class="card-note">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>Opens <code>bar_animation/testers-bar-polyu.html</code> — no server needed.</span>
+        </p>
+      </a>
+
+    </section>
+
+    <!-- How to run -->
+    <section class="run" aria-label="How to run the prototypes">
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+        How to run
+      </h2>
+      <p>Each prototype is self-contained. The game needs its dev server; the story opens straight from disk.</p>
+      <div class="run-grid">
+        <div class="run-item">
+          <div class="lbl">Gold Rush Hook</div>
+          <pre>cd gold_hook
+npm install
+npm run dev</pre>
+          <div class="out">Then open <a href="http://localhost:3000" target="_blank" rel="noopener">http://localhost:3000</a></div>
+        </div>
+        <div class="run-item">
+          <div class="lbl">測試工程師與酒吧</div>
+          <pre>bar_animation/testers-bar-polyu.html</pre>
+          <div class="out">Double-click to open in any modern browser (Chrome / Edge). No build step.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="foot-inner">
+      <span class="l">EduGenAI (PolyU) · COMP5241 mini-game prototypes</span>
+      <span class="r">
+        <span class="good">DO's ✓ = gold</span>
+        <span aria-hidden="true">·</span>
+        <span class="bad">DON'Ts ✗ = rocks</span>
+      </span>
+    </div>
+  </footer>
+
+</body>
+</html>
