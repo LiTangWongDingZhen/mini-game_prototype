@@ -151,6 +151,75 @@
   .run-item .out{ font-size:12.5px; color:var(--muted); }
   .run-item .out a{ color:var(--primary); font-weight:700; }
 
+  /* ---------- Prompt precision lesson ---------- */
+  .prompt-lesson{
+    margin:34px 0 0; background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .prompt-lesson h2{ margin:0 0 6px; font-size:16px; font-weight:700; display:flex; align-items:center; gap:9px; }
+  .prompt-lesson h2 svg{ width:19px; height:19px; color:var(--primary); }
+  .prompt-lesson > p{ margin:0 0 18px; font-size:13.5px; color:var(--muted); line-height:1.6; }
+
+  .prompt-block{
+    border:1px solid var(--line); border-radius:10px; background:#FAFAFB;
+    padding:16px 18px; margin-bottom:18px;
+  }
+  .prompt-label{
+    font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:10px;
+  }
+  .prompt-block pre{
+    margin:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13.5px; color:var(--ink); background:#fff; border:1px solid var(--line);
+    border-radius:8px; padding:12px 14px; line-height:1.6; overflow-x:auto;
+  }
+  .prompt-note{ margin:0 0 20px; font-size:14px; color:var(--muted-2); line-height:1.6; }
+  .prompt-note strong{ color:var(--ink); }
+
+  .prompt-cards{ display:grid; grid-template-columns:1fr; gap:18px; }
+  @media(min-width:840px){ .prompt-cards{ grid-template-columns:1fr 1fr; align-items:stretch; } }
+
+  .pcard{
+    position:relative; display:flex; flex-direction:column;
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    overflow:hidden;
+  }
+  .pcard::before{
+    content:""; position:absolute; inset:0 0 auto 0; height:4px;
+    background:var(--accent); transform:scaleX(.32); transform-origin:left; opacity:.95;
+    transition:transform .28s ease;
+  }
+  .pcard:hover, .pcard:focus-visible{
+    transform:translateY(-5px);
+    border-color:var(--accent);
+    box-shadow:0 18px 34px -14px rgba(162,25,66,.30);
+  }
+  .pcard:hover::before, .pcard:focus-visible::before{ transform:scaleX(1); }
+  .pcard--origin{ --accent:#B45309; }
+  .pcard--polyu{ --accent:#A21942; }
+
+  .pcard-head{ display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+  .pcard-num{
+    width:40px; height:40px; border-radius:12px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--accent); color:#fff; font-size:18px; font-weight:800;
+  }
+  .pcard-kicker{ font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .pcard-title{ margin:3px 0 0; font-size:18px; font-weight:700; letter-spacing:-.01em; }
+
+  .pcard-desc{ margin:0 0 16px; font-size:14px; line-height:1.6; color:var(--muted-2); flex:1; }
+  .pcard-desc strong{ color:var(--ink); }
+
+  .pcard-cta{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:14px; font-weight:700; color:var(--accent);
+    transition:gap .18s ease;
+  }
+  .pcard-cta svg{ width:16px; height:16px; }
+  .pcard:hover .pcard-cta{ gap:12px; }
+
   /* ---------- Footer ---------- */
   footer{ margin-top:auto; }
   .foot-inner{
@@ -288,6 +357,70 @@ npm run dev</pre>
           <pre>bar_animation/testers-bar-polyu.html</pre>
           <div class="out">Double-click to open in any modern browser (Chrome / Edge). No build step.</div>
         </div>
+      </div>
+    </section>
+
+    <!-- Prompt precision lesson -->
+    <section class="prompt-lesson" aria-label="Prompt precision lesson">
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        State Your Requirements Clearly
+      </h2>
+      <p>
+        Being concise when designing prompts for agents is important — but a single
+        ambiguous phrase can be read more than one way, and the agent will happily build
+        whichever reading it picks. The same prompt, two very different results.
+      </p>
+
+      <div class="prompt-block">
+        <div class="prompt-label">The prompt</div>
+        <pre>寫一個html程式，內容是一個動態svg：一個自行車騎著人往前走，然後後面有個鵜鶘拿鞭子抽他，人要有受擊反饋。</pre>
+      </div>
+
+      <p class="prompt-note">
+        The ambiguous phrase is <strong>「一個自行車騎著人往前走」</strong>.
+        Two agents, two readings:
+      </p>
+
+      <div class="prompt-cards">
+        <a class="pcard pcard--origin" href="state your requirements clearly/origin whip/origin whip.html" target="_blank" rel="noopener"
+           aria-label="Open origin whip.html — the first interpretation">
+          <div class="pcard-head">
+            <span class="pcard-num" aria-hidden="true">1</span>
+            <div>
+              <div class="pcard-kicker">First interpretation</div>
+              <h3 class="pcard-title">鵜鶘鞭打騎車人</h3>
+            </div>
+          </div>
+          <p class="pcard-desc">
+            The agent read it the "normal" way: a <strong>person riding a bicycle</strong>
+            going forward, with a pelican behind whipping him.
+          </p>
+          <span class="pcard-cta">
+            Open origin whip.html
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+
+        <a class="pcard pcard--polyu" href="state your requirements clearly/polyu-style/whip_pelican.html" target="_blank" rel="noopener"
+           aria-label="Open whip_pelican.html — the second interpretation">
+          <div class="pcard-head">
+            <span class="pcard-num" aria-hidden="true">2</span>
+            <div>
+              <div class="pcard-kicker">Second interpretation</div>
+              <h3 class="pcard-title">自行車騎著人 × 鵜鶘甩鞭</h3>
+            </div>
+          </div>
+          <p class="pcard-desc">
+            Re-prompted with the same phrase, the agent read it literally: a
+            <strong>bicycle riding on top of a person</strong>, who pumps his limbs to
+            lurch forward while a pelican whips him.
+          </p>
+          <span class="pcard-cta">
+            Open whip_pelican.html
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
       </div>
     </section>
   </main>
