@@ -327,9 +327,9 @@ function buildMan(){
 
   // torso + head
   const torso=el("g",{id:"torsoG"},g);
+  el("circle",{cx:MAN.hip.x+8,cy:MAN.hip.y-4,r:13,fill:"#f2c9a0"},torso); // hip (behind the shirt)
   el("line",{x1:MAN.hip.x,y1:MAN.hip.y,x2:MAN.shoulder.x,y2:MAN.shoulder.y,
              stroke:"#ff9f40","stroke-width":30,"stroke-linecap":"round"},torso);
-  el("circle",{cx:MAN.hip.x+8,cy:MAN.hip.y-4,r:13,fill:"#f2c9a0"},torso); // neck hint
 
   const head=el("g",{id:"manHead"},torso);
   // helmet
@@ -632,7 +632,7 @@ function frame(now){
   // legs pump
   const footAt=ph=>({x:MAN.hip.x+34*Math.sin(ph), y:497-14*Math.max(0,Math.cos(ph))});
   function setManLeg(leg,foot){
-    const knee=ikUp(MAN.hip,foot,48,50);
+    const knee=ikKnee(MAN.hip,foot,48,50,-1); // consistent forward bend (knee leads, toward the bike)
     setLine(leg._thigh,MAN.hip.x,MAN.hip.y,knee.x,knee.y);
     setLine(leg._shin,knee.x,knee.y,foot.x,foot.y);
     leg._shoe.setAttribute("d",shoePath(foot.x,foot.y));

@@ -652,7 +652,7 @@ function frame(now){
   // legs: near leg to ped1, far leg to ped2
   function setLeg(legGroup,hip,foot){
     const L1=78,L2=80;
-    const knee=ikKnee(hip,foot,L1,L2,+1); // bend forward/up
+    const knee=ikKnee(hip,foot,L1,L2,-1); // bend forward (knee leads, toward front wheel)
     setLine(legGroup._thigh,hip.x,hip.y,knee.x,knee.y);
     setLine(legGroup._shin,knee.x,knee.y,foot.x,foot.y);
     legGroup._shoe.setAttribute("d",
