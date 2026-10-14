@@ -34,7 +34,7 @@ buildBackground → buildPelican → buildMan → buildBike → buildFX → buil
   - `lastHitTime(t)` derives hit times **analytically from `t`** (no mutable state) — keep it that way.
   - `MAN`, `B` — anchor points for IK and geometry.
 - Hit reaction: `flinch = 1 - ease((t - lastHit) / flinchDur)`; drives the man's lurch + squash + face swap, the bike's shake/slide, and the FX star/ring/text at `WHIP._lastTip`.
-- Limbs use 2-bone IK: `ikKnee(hip, foot, L1, L2, bendSign)` with `ikUp` (knees go up) and `ikDown` (elbows go down) picking the bend side by height.
+- Limbs use 2-bone IK: `ikKnee(hip, foot, L1, L2, bendSign)`. The man's **legs** use a fixed `bendSign = -1` (knee always leads forward, toward the bike) — do **not** use `ikUp` here, it flips the knee side mid-stride. The man's **arms** use `ikDown` (elbows go down). `ikUp`/`ikDown` pick a bend side by height and are only safe when the desired side is consistent with "higher/lower".
 - Scrolling background: tiled `<g>` groups translated by `-(t * speed) % period`; world speed 230 px/s, hills ×0.2, clouds ×0.35 (per-element modulo wrap).
 
 ## Tuning knobs
@@ -62,8 +62,14 @@ buildBackground → buildPelican → buildMan → buildBike → buildFX → buil
 - New limb segments must keep `L1 + L2 >= max(hip→foot distance)`, otherwise the IK clamp visibly stretches limbs.
 - Any new group that `frame()` reads must be registered in `wire()` **before** the first `frame()` call.
 - Keep the z-order: `man` → `bike` → `fx` → `whip` (whip must visibly cross the man on impact; bike must sit above the man's back).
+- **Inside the man group, the hip circle must be drawn *before* the torso line** (SVG paints in document order). The hip is a skin-tone circle at the hip joint; if it's added after the torso line it sits *on top of the shirt* and looks like a blob over the clothes. Keep it first in `#torsoG` so the orange torso covers it.
 
 ## Changelog
+
+### 2026-10-14 — Fixed man's knee flip + hip-over-clothes z-order
+
+- **Knee flip:** `setManLeg()` used `ikUp(...)` (picks the higher knee solution), which made the knee **flip sides** mid-stride (forward when the foot was ahead, behind the hip when it swung back) — a jerky, broken look. Replaced with a fixed `ikKnee(MAN.hip, foot, 48, 50, -1)` so the knee always leads **forward** (toward the bike), a natural pumping pose.
+- **Hip over clothes:** the hip circle was added *after* the torso line in `#torsoG`, so it painted on top of the shirt. Moved it *before* the torso line so the orange torso covers it (see Pitfalls).
 
 ### 2026-10-11 — Restyled to EduGenAI / PolyU design system (per README.md §1)
 

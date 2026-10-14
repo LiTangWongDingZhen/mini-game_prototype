@@ -25,11 +25,12 @@ Everything lives in one file: `origin whip.html`
 - **Positions are absolute SVG coordinates** in the 1200×600 viewBox. Joint positions, keyframe values, and rotation pivots all hardcode these — if you move something, update its references (e.g. wheel rotation pivots are hardcoded in `frame()` as `rotate(deg, 735, 447)` / `rotate(deg, 905, 447)`).
 - **Whip hand position** is computed from `HAND_BASE` + pelican hop offset each frame, so the whip stays attached to the bird.
 - **Hit timing** derives from `t % WHIP.cycle` and `hitPhase` — change either and the flinch window (`flinchDur = 0.45s`) and FX (`0.5s` window) still key off `lastHitTime(t)`.
-- **IK legs** use `ikKnee(hip, foot, L1, L2, bendSign)`; `bendSign` picks which way the knee bends.
+- **IK legs** use `ikKnee(hip, foot, L1, L2, bendSign)`; `bendSign` picks which side of the hip→foot line the knee lands on. The cyclist faces right (+x), so the rider's legs use **`bendSign = -1`** (knee bends *forward*, toward the front wheel) in `setLeg()`. The pelican's legs use `+1` (its stride bends the other way). Don't "normalize" these signs — they are character-specific.
 - `wire()` binds all private `._` refs onto `svg` at startup — call it before `frame()` if you add new refs.
 
 ## Gotchas
 
 - `buildRider` inserts the far leg *before* the bike group (`$("bike").before(far)`) so it renders behind the frame. Don't reorder the builders.
+- **Rider leg bend direction:** `setLeg()` must call `ikKnee(..., -1)`. Using `+1` puts the knee *behind* the hip (chicken-leg pose) — the legs look broken. The sign is easy to flip by accident; if the rider's legs suddenly bend backward, this is the culprit.
 - The `id:null` attr on the spokes group is a harmless no-op; leave it.
 - FX text cycles through `["OUCH!","痛!!","啪!","喂喂!","好痛"]` indexed by hit count.

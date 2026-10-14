@@ -1394,9 +1394,12 @@ function goto(i){
   updatePlayBtn();
   resetStage();
   typeCaption(SCENES[state.i].text, tok);
-  SCENES[state.i].run(tok).then(ok => {
+  SCENES[state.i].run(tok).then(async ok => {
     if (tok !== sceneToken) return;
-    if (state.i < SCENES.length - 1) goto(state.i + 1);
+    if (state.i < SCENES.length - 1) {
+      if (!(await wait(1000, tok))) return;
+      goto(state.i + 1);
+    }
     else { state.ended = true; updatePlayBtn(); }
   });
 }
