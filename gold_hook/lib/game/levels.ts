@@ -47,6 +47,8 @@ export const LEVEL_COUNT = LEVELS.length;
 /** Canvas logical size shared by simulation + renderer. */
 export const CANVAS_W = 800;
 export const CANVAS_H = 560;
+/** Ground surface line (shared by simulation + renderer). */
+export const GROUND_Y = Math.round(CANVAS_H * 0.58);
 
 export function levelDef(level: number): LevelDef {
   return LEVELS[Math.min(Math.max(level - 1, 0), LEVELS.length - 1)];
@@ -59,7 +61,7 @@ export function levelTime(level: number, upgrades: Upgrades): number {
 
 /**
  * Generate the object field for a level.
- * Objects spawn in the bottom ~45% of the canvas without heavy overlap.
+ * Objects spawn below the ground surface without heavy overlap.
  */
 export function generateLevel(level: number, upgrades: Upgrades, seed: number): GameObject[] {
   const mulberry = makeSeededRng(seed);
@@ -83,7 +85,8 @@ export function generateLevel(level: number, upgrades: Upgrades, seed: number): 
   const objects: GameObject[] = [];
   const minX = 50;
   const maxX = CANVAS_W - 50;
-  const minY = CANVAS_H * 0.55;
+  // Keep object centers below the ground surface so nothing floats in the air.
+  const minY = GROUND_Y + 24;
   const maxY = CANVAS_H - 46;
 
   kinds.forEach((kind, idx) => {

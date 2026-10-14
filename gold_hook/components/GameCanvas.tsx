@@ -11,14 +11,13 @@ import {
   stepSim,
   type Sim,
 } from "@/lib/game/hook";
-import { CANVAS_H, CANVAS_W, makeSeededRng } from "@/lib/game/levels";
+import { CANVAS_H, CANVAS_W, GROUND_Y, levelTime, makeSeededRng } from "@/lib/game/levels";
 import { rollMystery } from "@/lib/game/catalog";
 import { sfx } from "@/lib/game/audio";
 import type { GameObject } from "@/lib/game/types";
 
 const W = CANVAS_W;
 const H = CANVAS_H;
-const GROUND_Y = Math.round(H * 0.58);
 
 /** Custom event so DOM buttons (HUD, mobile bar) can press the hook. */
 export const HOOK_PRESS_EVENT = "grh:hook-press";
@@ -265,11 +264,19 @@ function draw(ctx: CanvasRenderingContext2D, dpr: number, sim: Sim, fx: Fx, time
   ctx.save();
   ctx.scale(dpr, dpr);
 
-  drawSky(ctx, time);
+  const store = useStore.getState();
+  // Day progress: 0 = round start (dawn) → 0.5 (noon) → 1 = round end (sunset).
+  // Outside of play (menu / shop / end screens) show the dawn "ready" sky.
+  const total = levelTime(store.level, store.upgrades);
+  const p =
+    store.phase === "playing" && total > 0
+      ? Math.min(1, Math.max(0, 1 - store.timeLeft / total))
+      : 0;
+
+  drawSky(ctx, time, p);
   drawGround(ctx);
 
   // Objects (depth-sorted), grabbed object drawn at the hook tip.
-  const store = useStore.getState();
   const objects = [...store.objects].sort((a, b) => a.y - b.y);
   for (const o of objects) {
     if (o.id === sim.grabbed?.id) continue;
@@ -282,30 +289,115 @@ function draw(ctx: CanvasRenderingContext2D, dpr: number, sim: Sim, fx: Fx, time
   ctx.restore();
 }
 
-function drawSky(ctx: CanvasRenderingContext2D, time: number) {
-  // Bright daytime sky (EduGenAI light theme): blue → sky → warm horizon.
+// ── dynamic sky (dawn → noon → sunset by round time) ─────────────────
+type RGB = [number, number, number];
+
+function hexToRgb(hex: string): RGB {
+  const h = hex.replace("#", "");
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
+  ];
+}
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const lerpRgb = (a: RGB, b: RGB, t: number): RGB => [
+  lerp(a[0], b[0], t),
+  lerp(a[1], b[1], t),
+  lerp(a[2], b[2], t),
+];
+const rgbCss = (c: RGB, alpha = 1) =>
+  `rgba(${Math.round(c[0])}, ${Math.round(c[1])}, ${Math.round(c[2])}, ${alpha})`;
+
+interface SkyKey {
+  top: RGB;
+  mid: RGB;
+  horizon: RGB;
+  sun: RGB;
+  glow: RGB;
+  glowA: number;
+  cloud: RGB;
+}
+
+// Three keyframes across the round: dawn (start) → noon (mid) → sunset (end).
+const DAWN: SkyKey = {
+  top: hexToRgb("#6f8fc9"),
+  mid: hexToRgb("#f2a9c0"),
+  horizon: hexToRgb("#ffd9a3"),
+  sun: hexToRgb("#ffcf7a"),
+  glow: hexToRgb("#ffbe78"),
+  glowA: 0.35,
+  cloud: hexToRgb("#ffd9e6"),
+};
+const NOON: SkyKey = {
+  top: hexToRgb("#60a5fa"),
+  mid: hexToRgb("#bae6fd"),
+  horizon: hexToRgb("#fef9c3"),
+  sun: hexToRgb("#fde047"),
+  glow: hexToRgb("#fde047"),
+  glowA: 0.25,
+  cloud: hexToRgb("#ffffff"),
+};
+const SUNSET: SkyKey = {
+  top: hexToRgb("#4b3a7a"),
+  mid: hexToRgb("#e86a4a"),
+  horizon: hexToRgb("#ffcf6b"),
+  sun: hexToRgb("#ff7a3c"),
+  glow: hexToRgb("#ff783c"),
+  glowA: 0.4,
+  cloud: hexToRgb("#ffc9a3"),
+};
+
+function mixKey(a: SkyKey, b: SkyKey, t: number): SkyKey {
+  return {
+    top: lerpRgb(a.top, b.top, t),
+    mid: lerpRgb(a.mid, b.mid, t),
+    horizon: lerpRgb(a.horizon, b.horizon, t),
+    sun: lerpRgb(a.sun, b.sun, t),
+    glow: lerpRgb(a.glow, b.glow, t),
+    glowA: lerp(a.glowA, b.glowA, t),
+    cloud: lerpRgb(a.cloud, b.cloud, t),
+  };
+}
+
+/** Interpolated sky palette for day-progress `p` in [0, 1]. */
+function skyAt(p: number): SkyKey {
+  return p < 0.5 ? mixKey(DAWN, NOON, p / 0.5) : mixKey(NOON, SUNSET, (p - 0.5) / 0.5);
+}
+
+/** Sun travels an arc: low at dawn/sunset, high at noon. */
+function sunPos(p: number) {
+  const x = W * (0.12 + 0.76 * p);
+  const y = GROUND_Y - 22 - 235 * Math.sin(p * Math.PI);
+  return { x, y };
+}
+
+function drawSky(ctx: CanvasRenderingContext2D, time: number, p: number) {
+  const sky = skyAt(p);
+  // Sky gradient (top → horizon) for the current time of day.
   const g = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-  g.addColorStop(0, "#60a5fa");
-  g.addColorStop(0.55, "#bae6fd");
-  g.addColorStop(1, "#fef9c3");
+  g.addColorStop(0, rgbCss(sky.top));
+  g.addColorStop(0.55, rgbCss(sky.mid));
+  g.addColorStop(1, rgbCss(sky.horizon));
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, GROUND_Y);
 
-  // Sun.
-  ctx.fillStyle = "rgba(253, 224, 71, 0.95)";
+  // Sun (position + colour follow the day).
+  const { x, y } = sunPos(p);
+  ctx.fillStyle = rgbCss(sky.glow, sky.glowA);
   ctx.beginPath();
-  ctx.arc(90, 84, 30, 0, Math.PI * 2);
+  ctx.arc(x, y, 46, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "rgba(253, 224, 71, 0.25)";
+  ctx.fillStyle = rgbCss(sky.sun);
   ctx.beginPath();
-  ctx.arc(90, 84, 46, 0, Math.PI * 2);
+  ctx.arc(x, y, 30, 0, Math.PI * 2);
   ctx.fill();
 
-  // Drifting clouds.
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  // Drifting clouds, tinted by the time of day.
+  ctx.fillStyle = rgbCss(sky.cloud, 0.9);
   for (const c of scenery.clouds) {
-    const x = (c.x + time * c.sp) % (W + 160) - 80;
-    cloud(ctx, x, c.y, c.s);
+    const cx = (c.x + time * c.sp) % (W + 160) - 80;
+    cloud(ctx, cx, c.y, c.s);
   }
 }
 

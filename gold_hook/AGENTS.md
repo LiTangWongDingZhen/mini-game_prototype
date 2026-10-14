@@ -81,9 +81,11 @@ lib/
 ### Tuning knobs (balance changes live here)
 
 - **Object values / labels / weights:** `lib/game/catalog.ts`
-- **Level targets, time limits, spawn counts, canvas size:** `lib/game/levels.ts`
+- **Level targets, time limits, spawn counts, canvas size, ground line
+  (`GROUND_Y`):** `lib/game/levels.ts`
 - **Upgrade costs / effects:** `lib/game/upgrades.ts`
-- **Hook speed / physics:** `lib/game/hook.ts`
+- **Hook speed / physics / reach (`MAX_LEN`, `MAX_ANGLE`, `PIVOT`):**
+  `lib/game/hook.ts`
 
 ### Phases
 
@@ -109,8 +111,9 @@ simulating unless `phase === "playing"`.
 - **Icons:** `lucide-react` for interface actions (per README UI stack);
   emoji remain for game *content* (💰/💎/🧨 labels, object art) — user
   sanctioned.
-- **Canvas:** bright daytime sky + warm ground (light theme); the neon
-  sunset from the original was intentionally replaced.
+- **Canvas:** dynamic sky that shifts dawn → noon → sunset with the round's
+  remaining time (see `drawSky` in `GameCanvas.tsx`) + warm ground (light
+  theme); the neon sunset from the original was intentionally replaced.
 - **A11y baseline:** global `:focus-visible` ring (brick red),
   `prefers-reduced-motion` kill-switch, ≥44px touch targets, 200ms
   transitions, decorative icons `aria-hidden`.
@@ -152,6 +155,23 @@ simulating unless `phase === "playing"`.
   best-score that never grows.
 - Canvas logical size is 800×560 (`CANVAS_W/H` in `lib/game/levels.ts`);
   DPR scaling handled in `GameCanvas.tsx`.
+- **Spawn / reach geometry (keep in sync):** the ground surface is the
+  single `GROUND_Y` constant in `lib/game/levels.ts` (imported by
+  `GameCanvas.tsx` for rendering). Objects spawn with centers at
+  `GROUND_Y + 24` or below — never above the surface. The hook's reach is
+  `MAX_LEN` in `lib/game/hook.ts`; it must be ≥ the distance from `PIVOT`
+  (400, 44) to the farthest bottom corner (≈ 653) so the corners stay
+  reachable. The `"out"` state also clamps the rope at `boundaryLimit(angle)`
+  (same file), which keeps the tip inside the 800×560 canvas for the current
+  swing angle — so the hook retracts at the window boundary instead of
+  extending through it. If you move `PIVOT`, change `CANVAS_W/H`, or raise
+  `MAX_ANGLE`, re-check all three of these.
+- **Dynamic sky (keep in sync):** `GameCanvas.tsx` `drawSky` interpolates the
+  `DAWN` / `NOON` / `SUNSET` keyframes by day-progress
+  `p = 1 - timeLeft / levelTime(level, upgrades)` (clamped 0..1; `p = 0`
+  outside of play so menu / shop / end screens show the dawn "ready" sky).
+  If you change level times or want a specific sky in a new phase, update the
+  `p` computation in `draw()`.
 - `README.md` documents the art/audio swap guide — update it if the visual
   language changes.
 - `EDUGENAI-README.md` (this folder) is the PolyU brand spec this copy must
@@ -159,6 +179,67 @@ simulating unless `phase === "playing"`.
   from it.
 
 ## Changelog
+
+### 2026-10-14 — Hydration fix + hook boundary retract
+
+- **Next.js "Recoverable Error" (hydration mismatch) fixed.** Root cause:
+  `StartScreen.tsx` rendered the "Continue run" button and the "Best" line
+  from `savedRun` / `bestScore`, which are populated from localStorage by
+  `initFromStorage()` — a client-only source. The server render never had
+  them, so the first client render (with a saved run present) produced
+  different HTML than the server, tripping React's hydration check. Fix:
+  added a `mounted` flag (`useState(false)` + `useEffect(() => setMounted(true))`)
+  and gated both conditional blocks behind `mounted && …`. The first client
+  render now matches the server HTML; the saved-run UI appears one tick
+  later, after mount. Verified: clean reload with a saved run present shows
+  no error overlay, and the "Continue run" / "Best" UI still appears.
+- **Hook no longer extends through the game window — it retracts at the
+  boundary.** Root cause: the `"out"` state only stopped the rope at
+  `MAX_LEN` (680), which is longer than the distance from `PIVOT` (400, 44)
+  to the bottom edge (516) and to the side edges at steep angles, so the tip
+  sailed past the canvas. Fix: added `boundaryLimit(angle)` in
+  `lib/game/hook.ts`, which computes the longest rope length that keeps the
+  tip inside the 800×560 canvas for the current swing angle (clamping
+  against the bottom edge `(CANVAS_H − PIVOT.y)/cos θ` and the nearer side
+  edge `PIVOT.x/|sin θ|`, all capped by `MAX_LEN`). The `"out"` state now
+  clamps `sim.length` to `boundaryLimit(sim.angle)` and transitions to
+  `"back"` once it reaches that limit, so the hook retracts at the window
+  boundary instead of extending through it. Verified: at θ = 0 the tip lands
+  at (400, 560); at θ = ±1.05 it lands on the left/right edges (≈ 0.3 / 799.7,
+  273.6) — always inside the canvas.
+- **Verified:** `tsc --noEmit` ✓, no lint errors; both fixes confirmed in the
+  browser (clean hydration + hook retracting at the boundary).
+
+### 2026-10-14 — Dynamic sky (dawn → noon → sunset by round time)
+
+- **The sky now changes with the round's remaining time.** Round start =
+  dawn, mid-round = noon, round end = sunset. Implemented in
+  `GameCanvas.tsx`: `draw()` computes day-progress
+  `p = 1 - timeLeft / levelTime(level, upgrades)` (clamped 0..1; `p = 0`
+  outside of play) and passes it to `drawSky(ctx, time, p)`. `drawSky`
+  interpolates between three keyframe palettes (`DAWN` / `NOON` / `SUNSET`)
+  for the sky gradient, sun colour, glow, and cloud tint, and moves the sun
+  along an arc (`sunPos`) — low at dawn/sunset, high at noon.
+- **Verified:** `tsc --noEmit` ✓; dawn (start), noon (mid), and sunset (end)
+  all confirmed in the browser.
+
+### 2026-10-14 — Spawn + hook-reach fixes
+
+- **Items no longer spawn above the ground.** Root cause: `generateLevel`
+  used `minY = CANVAS_H * 0.55` (308), which sat *above* the rendered ground
+  line `GROUND_Y = 325`, so objects with centers in [308, 325] floated in the
+  air. The two values were also defined independently and could drift. Fix:
+  introduced a single shared `GROUND_Y` constant in `lib/game/levels.ts`
+  (now imported by `GameCanvas.tsx` instead of its local copy) and set the
+  spawn floor to `minY = GROUND_Y + 24`, guaranteeing every object center is
+  below the surface.
+- **Hook now reaches the bottom corners.** Root cause: `MAX_LEN` was 512,
+  shorter than the distance from `PIVOT` (400, 44) to a bottom corner
+  (0, 560) ≈ 653, so the corners (and objects near them) were unreachable.
+  Fix: raised `MAX_LEN` to 680 in `lib/game/hook.ts`. Verified both corners
+  (dist 653, angle ±37.9°) and the leftmost low object (50, 514, dist 586)
+  now fall inside the reachable cone.
+- **Verified:** `tsc --noEmit` ✓, no lint errors in the three touched files.
 
 ### 2026-10-10 — PolyU EduGenAI house-style rebrand (this copy)
 
