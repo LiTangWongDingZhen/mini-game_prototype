@@ -93,6 +93,7 @@
   .card:hover::before, .card:focus-visible::before{ transform:scaleX(1); }
   .card--gold{ --accent:#B45309; --chip-bg:#FEF3C7; --chip-fg:#B45309; }
   .card--bar{ --accent:#A21942; --chip-bg:#F9E3EB; --chip-fg:#A21942; }
+  .card--notes{ --accent:#047857; --chip-bg:#D1FAE5; --chip-fg:#047857; }
 
   .card-top{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }
   .icon-chip{
@@ -332,6 +333,40 @@
         <p class="card-note">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
           <span>Opens <code>bar_animation/testers-bar-polyu.html</code> — no server needed.</span>
+        </p>
+      </a>
+
+      <!-- Course Notes -->
+      <a class="card card--notes" href="course%20notes/course-notes.html" target="_blank" rel="noopener"
+         aria-label="Open the COMP5241 course notes viewer">
+        <div class="card-top">
+          <span class="icon-chip" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </span>
+          <div>
+            <div class="card-kicker">Course Notes</div>
+            <h2 class="card-title">COMP5241 Notes</h2>
+            <p class="card-sub">5 chapters · 6 languages</p>
+          </div>
+        </div>
+        <p class="card-desc">
+          A self-contained viewer for the COMP5241 course notes. Pick a chapter and a
+          language — English, 繁體中文, 简体中文, 日本語, Deutsch, or Español — and read
+          the rendered markdown with a live table of contents.
+        </p>
+        <div class="tags">
+          <span class="tag">6 languages</span>
+          <span class="tag">5 chapters</span>
+          <span class="tag">Markdown</span>
+          <span class="tag">Zero deps</span>
+        </div>
+        <span class="card-cta">
+          Read the notes
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
+        <p class="card-note">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>Opens <code>course notes/course-notes.html</code> — serve over HTTP to load the markdown.</span>
         </p>
       </a>
 
