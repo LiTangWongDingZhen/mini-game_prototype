@@ -1,6 +1,6 @@
 # mini-game_prototype
 
-A **COMP5241 mini-game prototype site** — one deployable static site made of three
+A **COMP5241 mini-game prototype site** — one deployable static site made of four
 self-contained pieces:
 
 | Piece | Path | What it is |
@@ -9,6 +9,7 @@ self-contained pieces:
 | ⛏️ **Gold Rush Hook** | [`gold_hook/`](./gold_hook) | A Gold Miner–style **SDLC learning game** (Next.js 15 + Canvas 2D + Zustand) |
 | 🍺 Testers & the Bar | [`bar_animation/`](./bar_animation) | A 23-scene **animated SVG story** (single HTML file) |
 | 🪶 Whip demo | [`state your requirements clearly/`](./state%20your%20requirements%20clearly) | Two HTML interpretations of one prompt — a lesson in **prompt precision** |
+| 📚 Course notes | [`course notes/`](./course%20notes) | A self-contained **COMP5241 notes viewer** (5 chapters × 6 languages) |
 
 Each piece is independent and has its own `agents.md` / `AGENTS.md` and (for the
 game) a full `README.md`. This file is the project-level overview.
@@ -80,6 +81,10 @@ step:
 - `state your requirements clearly/origin whip/origin whip.html`
 - `state your requirements clearly/polyu-style/whip_pelican.html`
 
+The **course notes viewer** fetches its markdown, so serve it over HTTP
+(from the repo root): `npx serve . -l 4174` →
+`http://localhost:4174/course%20notes/course-notes.html`.
+
 ---
 
 ## Deploy to Vercel
@@ -96,10 +101,11 @@ The site is deployed as **plain static files** — there is no server at runtime
    - `/gold_hook/` — the game
    - `/bar_animation/testers-bar-polyu.html` — the bar story
    - `/state your requirements clearly/...` — the whip demo
+   - `/course notes/course-notes.html` — the course notes viewer
 
 ### How the build works
 
-[`build.mjs`](./build.mjs) (run by `npm run build`) does three things:
+[`build.mjs`](./build.mjs) (run by `npm run build`) does four things:
 
 1. Installs + builds the Next.js game as a **static export**
    (`output: "export"`, `basePath: "/gold_hook"` in
@@ -107,6 +113,9 @@ The site is deployed as **plain static files** — there is no server at runtime
 2. Copies `index.html` → `dist/index.html`.
 3. Copies `gold_hook/out/` → `dist/gold_hook/`, plus the two demo folders, into
    `dist/`.
+4. Copies the course notes viewer (`course-notes.html` + the six language
+   folders) → `dist/course notes/` (the `recommended style.md` design guide is
+   intentionally excluded).
 
 Because the game is exported with `basePath: "/gold_hook"`, its HTML references
 `/gold_hook/_next/...`, which resolves correctly when `out/` is placed at
@@ -132,11 +141,14 @@ site works from any host.
 │   └── lib/                            #   store + game logic (hook, levels, catalog…)
 ├── bar_animation/                      # animated SVG story — see bar_animation/agents.md
 │   └── testers-bar-polyu.html
-└── state your requirements clearly/    # whip demo — two interpretations
-    ├── origin whip/
-    │   └── origin whip.html
-    └── polyu-style/
-        └── whip_pelican.html
+├── state your requirements clearly/    # whip demo — two interpretations
+│   ├── origin whip/
+│   │   └── origin whip.html
+│   └── polyu-style/
+│       └── whip_pelican.html
+└── course notes/                       # course notes viewer — see course notes/agents.md
+    ├── course-notes.html
+    └── en/ zh-tw/ zh-cn/ ja/ de/ es/   #   5 chapter .md files each
 ```
 
 ---
@@ -152,7 +164,7 @@ site works from any host.
 
 ## Conventions for contributors
 
-- Keep the three pieces **independent** — a change to one shouldn't require
+- Keep the four pieces **independent** — a change to one shouldn't require
   touching the others.
 - Keep all cross-page links in `index.html` **relative** (never hard-code
   `localhost` as a playable link).

@@ -5,7 +5,7 @@ Guidance for AI agents (and humans) working in this repository.
 ## What this is
 
 A COMP5241 mini-game prototype site. It is **one deployable static site** made
-of three self-contained pieces:
+of four self-contained pieces:
 
 | Piece | Path | What it is |
 | --- | --- | --- |
@@ -13,6 +13,7 @@ of three self-contained pieces:
 | **Gold Rush Hook** | `gold_hook/` | A Gold Miner–style SDLC game (Next.js 15 + Canvas 2D + Zustand) |
 | Testers & the Bar | `bar_animation/` | A 23-scene animated SVG story (single HTML file) |
 | Whip demo | `state your requirements clearly/` | Two HTML interpretations of one prompt (a lesson in prompt precision) |
+| Course notes | `course notes/` | A self-contained viewer for the COMP5241 notes (5 chapters × 6 languages) |
 
 Each subfolder is **independent** and has its own `agents.md` / `AGENTS.md`
 with deeper detail. Read the relevant one before editing that piece:
@@ -21,6 +22,7 @@ with deeper detail. Read the relevant one before editing that piece:
 - `bar_animation/agents.md` — the animated story
 - `state your requirements clearly/origin whip/agents.md` — first interpretation
 - `state your requirements clearly/polyu-style/AGENTS.md` — second interpretation
+- `course notes/agents.md` — the course notes viewer
 
 ## Deployment model (important)
 
@@ -49,6 +51,7 @@ dist/
   gold_hook/...                       ← game (served at /gold_hook/)
   bar_animation/...
   state your requirements clearly/...
+  course notes/...                    ← course notes viewer + markdown
 ```
 
 **Consequences for agents:**
@@ -63,8 +66,9 @@ dist/
   server. (The "How to run" section intentionally documents the local dev
   URL; that one is fine.)
 - Folder names with spaces (`state your requirements clearly/`,
-  `origin whip/`) are load-bearing — the links and the build copy them
-  verbatim. Don't rename them without updating `index.html` and `build.mjs`.
+  `origin whip/`, `course notes/`) are load-bearing — the links and the build
+  copy them verbatim. Don't rename them without updating `index.html` and
+  `build.mjs`.
 
 ## Commands
 
@@ -98,6 +102,7 @@ README.md                           ← project readme
 gold_hook/                          ← the game (see gold_hook/AGENTS.md)
 bar_animation/                      ← animated SVG story (see its agents.md)
 state your requirements clearly/    ← whip demo, two interpretations
+course notes/                       ← course notes viewer (see its agents.md)
 ```
 
 ## Agent rules — do

@@ -6,6 +6,7 @@
 //   dist/gold_hook/...                               <- Next.js game (static export)
 //   dist/bar_animation/...                           <- animated SVG story
 //   dist/state your requirements clearly/...         <- whip demo (two interpretations)
+//   dist/course notes/...                            <- course notes viewer + markdown
 //
 // The game is a Next.js app that is statically exported (output: "export")
 // with basePath "/gold_hook", so its HTML references /gold_hook/_next/... and
@@ -56,5 +57,21 @@ cpSync(
   path.join(dist, "state your requirements clearly"),
   { recursive: true },
 );
+
+// Course notes viewer (HTML + per-language markdown). The "recommended style.md"
+// design guide is not part of the site, so copy only the viewer and the
+// language folders.
+const courseNotes = path.join(root, "course notes");
+const courseNotesDist = path.join(dist, "course notes");
+mkdirSync(courseNotesDist, { recursive: true });
+cpSync(
+  path.join(courseNotes, "course-notes.html"),
+  path.join(courseNotesDist, "course-notes.html"),
+);
+for (const lang of ["en", "zh-tw", "zh-cn", "ja", "de", "es"]) {
+  cpSync(path.join(courseNotes, lang), path.join(courseNotesDist, lang), {
+    recursive: true,
+  });
+}
 
 log("Done. dist/ is ready to deploy.");
