@@ -268,7 +268,7 @@
     <section class="cards" aria-label="Prototypes">
 
       <!-- Gold Rush Hook -->
-      <a class="card card--gold" href="http://localhost:3000/gold_hook/" target="_blank" rel="noopener"
+      <a class="card card--gold js-game-link" href="gold_hook/" target="_blank" rel="noopener"
          aria-label="Open Gold Rush Hook, the SDLC learning game">
         <div class="card-top">
           <span class="icon-chip" aria-hidden="true">
@@ -437,5 +437,16 @@ npm run dev</pre>
     </div>
   </footer>
 
+  <script>
+    // The game is a Next.js app. When this page is opened straight from disk
+    // (file://), the relative "gold_hook/" link has no built game to point at,
+    // so redirect it to the local dev server. When served over http(s)
+    // (Vercel, or a local static server of dist/), the relative link is correct.
+    if (location.protocol === "file:") {
+      document.querySelectorAll(".js-game-link").forEach((a) => {
+        a.href = "http://localhost:3000/gold_hook/";
+      });
+    }
+  </script>
 </body>
 </html>
