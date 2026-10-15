@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { CheckCircle2, Play, RotateCcw, XCircle } from "lucide-react";
 import { useStore } from "@/lib/store";
 
@@ -10,6 +11,14 @@ export default function StartScreen() {
   const savedRun = useStore((s) => s.savedRun);
   const startNew = useStore((s) => s.startNew);
   const continueRun = useStore((s) => s.continueRun);
+
+  // `savedRun` / `bestScore` come from localStorage (client-only), so the
+  // server render never has them. Gate the conditional UI behind a mount flag
+  // so the first client render matches the server HTML (no hydration error).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-[2px]">
@@ -61,7 +70,7 @@ export default function StartScreen() {
             <Play className="h-4 w-4" aria-hidden />
             Start a new run
           </button>
-          {savedRun && (
+          {mounted && savedRun && (
             <button
               onClick={continueRun}
               className="btn-secondary flex min-h-[44px] w-full max-w-xs cursor-pointer items-center justify-center gap-2"
@@ -70,7 +79,7 @@ export default function StartScreen() {
               Continue run (level {savedRun.level}, 💰 {savedRun.money})
             </button>
           )}
-          {(bestScore > 0 || bestLevel > 0) && (
+          {mounted && (bestScore > 0 || bestLevel > 0) && (
             <p className="mt-1 text-xs text-gray-500">
               Best: 💰 {bestScore} marks · reached level {bestLevel}
             </p>

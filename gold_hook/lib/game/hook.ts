@@ -1,4 +1,5 @@
 import type { GameObject, SimEvent, Upgrades } from "./types";
+import { CANVAS_H, CANVAS_W } from "./levels";
 
 /**
  * Hook simulation — a pure state machine stepped by the render loop.
@@ -23,7 +24,8 @@ export interface Sim {
 
 export const PIVOT = { x: 400, y: 44 };
 export const MAX_ANGLE = 1.05; // ~60°
-export const MAX_LEN = 512;
+// Long enough to reach the bottom corners: dist(PIVOT → (0,560)) ≈ 653.
+export const MAX_LEN = 680;
 export const TIP_RADIUS = 7;
 export const BLAST_RADIUS = 115;
 export const TNT_FUSE = 1.3;
@@ -72,6 +74,21 @@ function tipPosition(sim: Sim) {
 }
 
 /**
+ * Longest rope length that keeps the tip inside the canvas for a given
+ * swing angle. The hook retracts once it reaches this limit, so it never
+ * extends through the game window (bottom or side edges).
+ */
+function boundaryLimit(angle: number): number {
+  const s = Math.sin(angle);
+  const c = Math.cos(angle);
+  let limit = MAX_LEN;
+  if (c > 1e-4) limit = Math.min(limit, (CANVAS_H - PIVOT.y) / c); // bottom edge
+  if (s > 1e-4) limit = Math.min(limit, (CANVAS_W - PIVOT.x) / s); // right edge
+  if (s < -1e-4) limit = Math.min(limit, PIVOT.x / -s); // left edge
+  return limit;
+}
+
+/**
  * Advance the simulation by dt seconds.
  * `objects` must contain only live (non-removed) objects.
  * Returns events for the renderer to react to (sound, store updates, FX).
@@ -93,7 +110,10 @@ export function stepSim(
   }
 
   if (sim.state === "out") {
-    sim.length += extendSpeed(upgrades) * dt;
+    // Stop at the canvas boundary (or MAX_LEN), whichever is closer, so the
+    // hook retracts instead of extending through the game window.
+    const limit = boundaryLimit(sim.angle);
+    sim.length = Math.min(sim.length + extendSpeed(upgrades) * dt, limit);
 
     // Grab the first object the tip touches.
     for (const obj of objects) {
@@ -105,8 +125,8 @@ export function stepSim(
       }
     }
 
-    if (sim.length >= MAX_LEN || sim.grabbed) {
-      sim.length = Math.min(sim.length, MAX_LEN);
+    if (sim.length >= limit || sim.grabbed) {
+      sim.length = Math.min(sim.length, limit);
       sim.state = "back";
     }
     tipPosition(sim);
