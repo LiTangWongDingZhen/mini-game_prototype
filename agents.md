@@ -14,6 +14,7 @@ of four self-contained pieces:
 | Testers & the Bar | `bar_animation/` | A 23-scene animated SVG story (single HTML file) |
 | Whip demo | `state your requirements clearly/` | Two HTML interpretations of one prompt (a lesson in prompt precision) |
 | Course notes | `course notes/` | A self-contained viewer for the COMP5241 notes (5 chapters × 6 languages) |
+| Tomori easter egg | `e_egg/` | A colored ASCII-art viewer of Tomori (single HTML file + source txt) |
 
 Each subfolder is **independent** and has its own `agents.md` / `AGENTS.md`
 with deeper detail. Read the relevant one before editing that piece:
@@ -54,6 +55,7 @@ dist/
   bar_animation/...
   state your requirements clearly/...
   course notes/...                    ← course notes viewer + markdown
+  e_egg/...                           ← Tomori ASCII art easter egg
 ```
 
 **Consequences for agents:**
@@ -109,6 +111,7 @@ gold_hook/                          ← the game (see gold_hook/AGENTS.md)
 bar_animation/                      ← animated SVG story (see its agents.md)
 state your requirements clearly/    ← whip demo, two interpretations
 course notes/                       ← course notes viewer (see its agents.md)
+e_egg/                              ← Tomori ASCII art easter egg (HTML + txt)
 ```
 
 ## Agent rules — do

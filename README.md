@@ -10,6 +10,7 @@ self-contained pieces:
 | 🍺 Testers & the Bar | [`bar_animation/`](./bar_animation) | A 23-scene **animated SVG story** (single HTML file) |
 | 🪶 Whip demo | [`state your requirements clearly/`](./state%20your%20requirements%20clearly) | Two HTML interpretations of one prompt — a lesson in **prompt precision** |
 | 📚 Course notes | [`course notes/`](./course%20notes) | A self-contained **COMP5241 notes viewer** (5 chapters × 6 languages) |
+| 🥚 Tomori easter egg | [`e_egg/`](./e_egg) | A **colored ASCII-art** viewer of Tomori (single HTML file + source txt) |
 
 Each piece is independent and has its own `agents.md` / `AGENTS.md` and (for the
 game) a full `README.md`. This file is the project-level overview.
@@ -81,9 +82,10 @@ step:
 - `state your requirements clearly/origin whip/origin whip.html`
 - `state your requirements clearly/polyu-style/whip_pelican.html`
 
-The **course notes viewer** fetches its markdown, so serve it over HTTP
-(from the repo root): `npx serve . -l 4174` →
-`http://localhost:4174/course%20notes/course-notes.html`.
+The **course notes viewer** and the **Tomori easter egg** fetch their source
+files, so serve them over HTTP (from the repo root): `npx serve . -l 4174` →
+`http://localhost:4174/course%20notes/course-notes.html` and
+`http://localhost:4174/e_egg/tomori.html`.
 
 ---
 
@@ -106,10 +108,11 @@ serverless function to keep its OpenRouter API key out of the browser.
    - `/bar_animation/testers-bar-polyu.html` — the bar story
    - `/state your requirements clearly/...` — the whip demo
    - `/course notes/course-notes.html` — the course notes viewer
+   - `/e_egg/tomori.html` — the Tomori ASCII art easter egg
 
 ### How the build works
 
-[`build.mjs`](./build.mjs) (run by `npm run build`) does four things:
+[`build.mjs`](./build.mjs) (run by `npm run build`) does five things:
 
 1. Installs + builds the Next.js game as a **static export**
    (`output: "export"`, `basePath: "/gold_hook"` in
@@ -120,6 +123,8 @@ serverless function to keep its OpenRouter API key out of the browser.
 4. Copies the course notes viewer (`course-notes.html` + the six language
    folders) → `dist/course notes/` (the `recommended style.md` design guide is
    intentionally excluded).
+5. Copies the Tomori easter egg (`tomori.html` + `tomori_ascii-art.txt` + the
+   reference webp) → `dist/e_egg/`.
 
 Vercel separately deploys [`api/course-notes-chat.js`](./api/course-notes-chat.js)
 as `/api/course-notes-chat`; it proxies bounded chat requests to OpenRouter
@@ -155,9 +160,12 @@ site works from any host.
 │   │   └── origin whip.html
 │   └── polyu-style/
 │       └── whip_pelican.html
-└── course notes/                       # course notes viewer — see course notes/agents.md
-    ├── course-notes.html
-    └── en/ zh-tw/ zh-cn/ ja/ de/ es/   #   5 chapter .md files each
+├── course notes/                       # course notes viewer — see course notes/agents.md
+│   ├── course-notes.html
+│   └── en/ zh-tw/ zh-cn/ ja/ de/ es/   #   5 chapter .md files each
+└── e_egg/                              # Tomori ASCII art easter egg
+    ├── tomori.html
+    └── tomori_ascii-art.txt
 ```
 
 ---

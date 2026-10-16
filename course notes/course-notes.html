@@ -600,7 +600,7 @@ const chatFab = document.getElementById("chatFab");
 
 // Raw markdown of the currently loaded chapter (set by load()).
 let lastRaw = null;
-// Conversation history sent to the model (system + user/assistant turns).
+// User/assistant conversation turns; the server owns the system instructions.
 let chatHistory = [];
 let chatBusy = false;
 
@@ -645,34 +645,19 @@ function addMsg(role, html) {
   return div;
 }
 
-function buildSystemPrompt() {
-  const base =
-    "You are a friendly, precise AI tutor for the PolyU COMP5241 course " +
-    "(GenAI-Powered Software Engineering). Answer the student's question clearly " +
-    "and concisely, using Markdown. When the student's question relates to the " +
-    "course material below, ground your answer in it and cite the relevant " +
-    "section. If the material does not cover the question, say so and answer " +
-    "from general knowledge, clearly flagging that it is outside the notes.";
-  if (chatCtxToggle.checked && lastRaw) {
-    return base + "\n\n=== CURRENT CHAPTER (" + lastRaw.label + ", " + lastRaw.lang + ") ===\n" + lastRaw.text;
-  }
-  return base;
-}
+function buildChatHistory(contextLength) {
+  let usedChars = contextLength;
+  const history = [];
 
-function buildChatMessages(text) {
-  const system = { role: "system", content: buildSystemPrompt() };
-  let usedChars = system.content.length + text.length;
-  const recentTurns = [];
-
-  for (let i = chatHistory.length - 2; i >= 0 && recentTurns.length < 18; i -= 2) {
+  for (let i = chatHistory.length - 2; i >= 0 && history.length < 18; i -= 2) {
     const turn = chatHistory.slice(i, i + 2);
     const turnChars = turn[0].content.length + turn[1].content.length;
     if (usedChars + turnChars > 40000) break;
-    recentTurns.unshift(...turn);
+    history.unshift(...turn);
     usedChars += turnChars;
   }
 
-  return [system, ...recentTurns, { role: "user", content: text }];
+  return history;
 }
 
 async function sendChat() {
@@ -683,7 +668,10 @@ async function sendChat() {
   chatText.style.height = "auto";
   addMsg("user", esc(text));
 
-  const messages = buildChatMessages(text);
+  const context = chatCtxToggle.checked && lastRaw
+    ? { label: lastRaw.label + " · " + lastRaw.lang.toUpperCase(), text: lastRaw.text }
+    : null;
+  const history = buildChatHistory(text.length + (context ? context.text.length : 0));
 
   const bubble = addMsg("assistant", '<span class="typing">…</span>');
   chatBusy = true;
@@ -696,11 +684,19 @@ async function sendChat() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ message: text, history, context }),
     });
     if (!res.ok) {
       let detail = "HTTP " + res.status;
-      try { const j = await res.json(); if (j && j.error && j.error.message) detail = j.error.message; } catch (_) {}
+      try {
+        const j = await res.json();
+        if (j && j.error && j.error.code === "PROMPT_INJECTION") {
+          bubble.className = "msg assistant";
+          bubble.textContent = "Bro, really? This is an learning platform avaliable for CS students, how come you will think i never thought of this?";
+          return;
+        }
+        if (j && j.error && j.error.message) detail = j.error.message;
+      } catch (_) {}
       throw new Error(detail);
     }
 
