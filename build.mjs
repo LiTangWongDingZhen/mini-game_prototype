@@ -1,5 +1,5 @@
-// Root build script — assembles the whole site into a single `dist/` folder
-// so it can be deployed as plain static files (e.g. on Vercel).
+// Root build script — assembles the site's static files into `dist/`.
+// Vercel deploys the separate course-notes API from the root `api/` folder.
 //
 // Layout produced in dist/:
 //   dist/index.html                                  <- landing page

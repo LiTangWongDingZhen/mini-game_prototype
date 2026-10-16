@@ -89,14 +89,18 @@ The **course notes viewer** fetches its markdown, so serve it over HTTP
 
 ## Deploy to Vercel
 
-The site is deployed as **plain static files** — there is no server at runtime.
+The site is primarily static files. The course-notes AI Tutor uses one Vercel
+serverless function to keep its OpenRouter API key out of the browser.
 
 1. Push this repository to GitHub.
 2. In Vercel, **Add New → Project** and import the repo.
 3. Vercel reads [`vercel.json`](./vercel.json):
    - `buildCommand`: `npm run build`
    - `outputDirectory`: `dist`
-4. Deploy. The result is served as:
+4. In the Vercel project settings, add `OPENROUTER_API_KEY` as an Environment
+   Variable for each environment where the AI Tutor should be available. Do
+   not add the key to frontend files or commit it to the repository.
+5. Deploy. The result is served as:
    - `/` — landing page
    - `/gold_hook/` — the game
    - `/bar_animation/testers-bar-polyu.html` — the bar story
@@ -116,6 +120,11 @@ The site is deployed as **plain static files** — there is no server at runtime
 4. Copies the course notes viewer (`course-notes.html` + the six language
    folders) → `dist/course notes/` (the `recommended style.md` design guide is
    intentionally excluded).
+
+Vercel separately deploys [`api/course-notes-chat.js`](./api/course-notes-chat.js)
+as `/api/course-notes-chat`; it proxies bounded chat requests to OpenRouter
+using the server-side `OPENROUTER_API_KEY`. The static viewer does not need or
+store a user's API key, and the model is fixed by the server function.
 
 Because the game is exported with `basePath: "/gold_hook"`, its HTML references
 `/gold_hook/_next/...`, which resolves correctly when `out/` is placed at

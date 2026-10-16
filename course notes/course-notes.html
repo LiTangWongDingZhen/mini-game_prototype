@@ -153,6 +153,105 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── AI Tutor chat (OpenRouter) ─────────────────────────── */
+  .chat {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 22rem; z-index: 60;
+    background: #fff; border-left: 1px solid var(--line);
+    box-shadow: -8px 0 24px rgba(0,0,0,.08);
+    display: flex; flex-direction: column;
+  }
+  .chat-head {
+    background: var(--polyu); color: #fff;
+    padding: .8rem 1rem;
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  }
+  .chat-head h2 { margin: 0; font-size: 1rem; }
+  .chat-head .ctx { margin: .15rem 0 0; font-size: .72rem; opacity: .85; }
+  .chat-head-actions { display: flex; gap: .25rem; }
+  .icon-btn {
+    background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: .35rem;
+    width: 1.9rem; height: 1.9rem; cursor: pointer; font-size: .85rem; line-height: 1;
+    transition: background .15s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.3); }
+  .chat-settings {
+    border-bottom: 1px solid var(--line); background: var(--page);
+    padding: .75rem 1rem; display: flex; flex-direction: column; gap: .6rem;
+  }
+  .chat-settings[hidden] { display: none; }
+  .chat-settings label {
+    font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+    color: #6b7280; display: flex; flex-direction: column; gap: .25rem;
+  }
+  .chat-settings input, .chat-settings select {
+    font: inherit; font-size: .85rem; color: var(--ink); text-transform: none; letter-spacing: normal;
+    border: 1px solid var(--line); border-radius: .35rem; padding: .4rem .6rem; background: #fff;
+  }
+  .chat-settings input:focus, .chat-settings select:focus {
+    outline: none; border-color: var(--polyu); box-shadow: 0 0 0 3px rgba(162,25,66,.15);
+  }
+  .chat-settings .row { display: flex; gap: .5rem; align-items: center; }
+  .chat-settings .hint { font-size: .72rem; color: #6b7280; }
+  .chat-msgs {
+    flex: 1; overflow-y: auto; padding: 1rem;
+    display: flex; flex-direction: column; gap: .75rem; background: var(--page);
+  }
+  .msg {
+    max-width: 92%; padding: .6rem .85rem; border-radius: .6rem;
+    font-size: .88rem; line-height: 1.55; overflow-wrap: break-word;
+  }
+  .msg.user { align-self: flex-end; background: var(--polyu); color: #fff; border-bottom-right-radius: .2rem; }
+  .msg.assistant { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: .2rem; }
+  .msg.error { align-self: flex-start; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+  .msg .md p { margin: .4rem 0; }
+  .msg .md pre { font-size: .8rem; }
+  .msg .md h1, .msg .md h2, .msg .md h3 { font-size: 1rem; margin: .6rem 0 .3rem; }
+  .chat-welcome { margin: auto; text-align: center; color: #6b7280; font-size: .85rem; padding: 1rem; }
+  .chat-welcome .icon { font-size: 2rem; }
+  .chat-input {
+    border-top: 1px solid var(--line); padding: .75rem; background: #fff;
+    display: flex; gap: .5rem; align-items: flex-end;
+  }
+  .chat-input textarea {
+    flex: 1; resize: none; font: inherit; font-size: .88rem;
+    border: 1px solid var(--line); border-radius: .45rem; padding: .55rem .7rem; max-height: 8rem;
+  }
+  .chat-input textarea:focus { outline: none; border-color: var(--polyu); box-shadow: 0 0 0 3px rgba(162,25,66,.15); }
+  .chat-input button {
+    background: var(--polyu); color: #fff; border: none; border-radius: .45rem;
+    padding: .55rem .9rem; font: inherit; font-weight: 600; cursor: pointer; transition: background .2s;
+  }
+  .chat-input button:hover { background: var(--polyu-dark); }
+  .chat-fab {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 59;
+    width: 3.25rem; height: 3.25rem; border-radius: 50%;
+    background: var(--polyu); color: #fff; border: none; font-size: 1.3rem; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(162,25,66,.4);
+    display: none;
+  }
+  /* Wide screens: reserve space for the docked chat */
+  @media (min-width: 1101px) {
+    body:not(.chat-hidden) .wrap,
+    body:not(.chat-hidden) .head-inner,
+    body:not(.chat-hidden) .foot-inner { padding-right: 23.5rem; }
+    body.chat-hidden .chat { display: none; }
+    body.chat-hidden .chat-fab { display: block; }
+  }
+  /* Narrow screens: floating card + FAB */
+  @media (max-width: 1100px) {
+    .chat {
+      top: auto; bottom: 1rem; right: 1rem;
+      width: min(22rem, calc(100vw - 2rem)); height: min(75vh, 34rem);
+      border: 1px solid var(--line); border-radius: .75rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,.25);
+      display: none;
+    }
+    .chat.open { display: flex; }
+    .chat.open + .chat-fab { display: none; }
+    .chat-fab { display: block; }
+  }
+
   footer { border-top: 1px solid var(--line); background: #fff; padding: 1rem 0; margin-top: 2rem; }
   .foot-inner { max-width: 80rem; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: .8rem; color: #6b7280; }
 </style>
@@ -201,6 +300,42 @@
     <main class="content" id="content" aria-live="polite"></main>
   </div>
 </div>
+
+<!-- ── AI Tutor chat (OpenRouter) ─────────────────────────── -->
+<aside class="chat" id="chat" aria-label="AI tutor chat">
+  <div class="chat-head">
+    <div>
+      <h2>🎓 AI Tutor</h2>
+      <p class="ctx" id="chatCtx">Context: —</p>
+    </div>
+    <div class="chat-head-actions">
+      <button class="icon-btn" id="chatSettingsBtn" title="Settings" aria-label="Chat settings">⚙️</button>
+      <button class="icon-btn" id="chatCloseBtn" title="Hide chat" aria-label="Hide chat">✕</button>
+    </div>
+  </div>
+
+  <div class="chat-settings" id="chatSettings" hidden>
+    <div class="row">
+      <label style="flex-direction:row;align-items:center;gap:.4rem;text-transform:none;letter-spacing:0;">
+        <input type="checkbox" id="chatCtxToggle" checked style="width:auto;"> Include current chapter as context
+      </label>
+    </div>
+    <p class="hint">The AI Tutor uses the course site's managed connection. You do not need an API key.</p>
+  </div>
+
+  <div class="chat-msgs" id="chatMsgs" aria-live="polite">
+    <div class="chat-welcome" id="chatWelcome">
+      <div class="icon">💬</div>
+      <p>Ask me anything about the chapter you're reading — I'll ground my answers in the course notes.</p>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <textarea id="chatText" rows="2" placeholder="Ask a question about this chapter… (Enter to send, Shift+Enter for a new line)"></textarea>
+    <button id="chatSendBtn">Send</button>
+  </div>
+</aside>
+<button class="chat-fab" id="chatFab" title="Open AI tutor" aria-label="Open AI tutor chat">💬</button>
 
 <footer>
   <div class="foot-inner">
@@ -437,12 +572,206 @@ async function load() {
 
   if (seq !== loadSeq) return; // a newer load has taken over
 
+  // Keep the raw markdown around so the AI tutor can use it as context.
+  lastRaw = { url, lang, label: ch.label, text };
+  updateChatCtx();
+
   content.innerHTML = '<div class="md">' + mdToHtml(text) + "</div>";
   metaLine.innerHTML = "Source: <code>" + esc(url) + "</code> · " + lang.toUpperCase();
   buildToc();
   setupScrollSpy();
   window.scrollTo({ top: 0 });
 }
+
+// ── AI Tutor chat (OpenRouter) ─────────────────────────────
+// Requests go through the Vercel function; the OpenRouter key stays server-side.
+const CHAT_KEY = "course-notes-chat:v1";
+const chat = document.getElementById("chat");
+const chatMsgs = document.getElementById("chatMsgs");
+const chatWelcome = document.getElementById("chatWelcome");
+const chatText = document.getElementById("chatText");
+const chatSendBtn = document.getElementById("chatSendBtn");
+const chatCtxToggle = document.getElementById("chatCtxToggle");
+const chatCtx = document.getElementById("chatCtx");
+const chatSettings = document.getElementById("chatSettings");
+const chatSettingsBtn = document.getElementById("chatSettingsBtn");
+const chatCloseBtn = document.getElementById("chatCloseBtn");
+const chatFab = document.getElementById("chatFab");
+
+// Raw markdown of the currently loaded chapter (set by load()).
+let lastRaw = null;
+// Conversation history sent to the model (system + user/assistant turns).
+let chatHistory = [];
+let chatBusy = false;
+
+function chatStore() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CHAT_KEY) || "{}");
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
+    delete saved.apiKey;
+    delete saved.model;
+    return saved;
+  } catch (_) { return {}; }
+}
+function saveChatStore(patch) {
+  try { localStorage.setItem(CHAT_KEY, JSON.stringify(Object.assign(chatStore(), patch))); } catch (_) {}
+}
+
+// Restore saved settings.
+(function initChatSettings() {
+  const s = chatStore();
+  // Remove credentials and model preferences saved by earlier versions.
+  saveChatStore({});
+  if (s.includeCtx === false) chatCtxToggle.checked = false;
+  if (s.open) chat.classList.add("open");
+  if (s.hidden) document.body.classList.add("chat-hidden");
+})();
+
+function updateChatCtx() {
+  if (lastRaw) {
+    chatCtx.textContent = "Context: " + lastRaw.label + " · " + lastRaw.lang.toUpperCase();
+  } else {
+    chatCtx.textContent = "Context: —";
+  }
+}
+
+function addMsg(role, html) {
+  if (chatWelcome) chatWelcome.style.display = "none";
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  div.innerHTML = html;
+  chatMsgs.appendChild(div);
+  chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  return div;
+}
+
+function buildSystemPrompt() {
+  const base =
+    "You are a friendly, precise AI tutor for the PolyU COMP5241 course " +
+    "(GenAI-Powered Software Engineering). Answer the student's question clearly " +
+    "and concisely, using Markdown. When the student's question relates to the " +
+    "course material below, ground your answer in it and cite the relevant " +
+    "section. If the material does not cover the question, say so and answer " +
+    "from general knowledge, clearly flagging that it is outside the notes.";
+  if (chatCtxToggle.checked && lastRaw) {
+    return base + "\n\n=== CURRENT CHAPTER (" + lastRaw.label + ", " + lastRaw.lang + ") ===\n" + lastRaw.text;
+  }
+  return base;
+}
+
+function buildChatMessages(text) {
+  const system = { role: "system", content: buildSystemPrompt() };
+  let usedChars = system.content.length + text.length;
+  const recentTurns = [];
+
+  for (let i = chatHistory.length - 2; i >= 0 && recentTurns.length < 18; i -= 2) {
+    const turn = chatHistory.slice(i, i + 2);
+    const turnChars = turn[0].content.length + turn[1].content.length;
+    if (usedChars + turnChars > 40000) break;
+    recentTurns.unshift(...turn);
+    usedChars += turnChars;
+  }
+
+  return [system, ...recentTurns, { role: "user", content: text }];
+}
+
+async function sendChat() {
+  const text = chatText.value.trim();
+  if (!text || chatBusy) return;
+
+  chatText.value = "";
+  chatText.style.height = "auto";
+  addMsg("user", esc(text));
+
+  const messages = buildChatMessages(text);
+
+  const bubble = addMsg("assistant", '<span class="typing">…</span>');
+  chatBusy = true;
+  chatSendBtn.disabled = true;
+
+  let acc = "";
+  try {
+    const res = await fetch("/api/course-notes-chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ messages }),
+    });
+    if (!res.ok) {
+      let detail = "HTTP " + res.status;
+      try { const j = await res.json(); if (j && j.error && j.error.message) detail = j.error.message; } catch (_) {}
+      throw new Error(detail);
+    }
+
+    // Stream the SSE response and render incrementally.
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop(); // keep the trailing partial line
+      for (const line of lines) {
+        const t = line.trim();
+        if (!t.startsWith("data:")) continue;
+        const data = t.slice(5).trim();
+        if (data === "[DONE]") continue;
+        let json;
+        try { json = JSON.parse(data); } catch (_) { continue; }
+        const delta = json.choices && json.choices[0] && json.choices[0].delta;
+        if (delta && typeof delta.content === "string") {
+          acc += delta.content;
+          bubble.innerHTML = '<div class="md">' + mdToHtml(acc) + "</div>";
+          chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        }
+      }
+    }
+    if (!acc) acc = "(empty response)";
+    bubble.innerHTML = '<div class="md">' + mdToHtml(acc) + "</div>";
+    chatHistory.push({ role: "user", content: text }, { role: "assistant", content: acc });
+  } catch (err) {
+    bubble.className = "msg error";
+    bubble.innerHTML = esc("⚠️ " + err.message);
+  } finally {
+    chatBusy = false;
+    chatSendBtn.disabled = false;
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    chatText.focus();
+  }
+}
+
+// Wire up chat controls.
+chatSendBtn.addEventListener("click", sendChat);
+chatText.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+chatText.addEventListener("input", () => {
+  chatText.style.height = "auto";
+  chatText.style.height = Math.min(chatText.scrollHeight, 128) + "px";
+});
+chatCtxToggle.addEventListener("change", () => saveChatStore({ includeCtx: chatCtxToggle.checked }));
+chatSettingsBtn.addEventListener("click", () => { chatSettings.hidden = !chatSettings.hidden; });
+chatCloseBtn.addEventListener("click", () => {
+  if (window.matchMedia("(max-width: 1100px)").matches) {
+    chat.classList.remove("open");
+    saveChatStore({ open: false });
+  } else {
+    document.body.classList.add("chat-hidden");
+    saveChatStore({ hidden: true });
+  }
+});
+chatFab.addEventListener("click", () => {
+  if (window.matchMedia("(max-width: 1100px)").matches) {
+    chat.classList.add("open");
+    saveChatStore({ open: true });
+  } else {
+    document.body.classList.remove("chat-hidden");
+    saveChatStore({ hidden: false });
+  }
+});
 
 chapterSel.addEventListener("change", load);
 langSel.addEventListener("change", load);
