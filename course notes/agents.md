@@ -99,10 +99,15 @@ the `CHAPTERS`/language `<select>` in `course-notes.html`, the copy loop in
   `build.mjs`.
 - The AI Tutor requires the Vercel function and `OPENROUTER_API_KEY`; it will
   not work from a static-only local server. Users do not supply their own key.
+- Tutor instructions are fixed in the server function, never accepted from the
+  browser. The API rejects common prompt-override attempts and labels chapter
+  context as untrusted reference material; this is defense in depth, not a
+  guarantee against every prompt injection technique. A rejected attempt shows
+  the chat easter-egg message.
 - **`serve` strips `.html`** with a 301 redirect (`course-notes.html` →
   `course-notes`). Browsers follow it transparently; it's not an error.
 - **Some markdown files contain `??` artifacts** (encoding issues in the
   source notes). The viewer renders them as-is; fix them in the `.md` files if
   they look wrong, not in the parser.
-- **Don't add a runtime server or API routes** — the whole site deploys as
-  static files.
+- The rest of the site remains static; the course-notes tutor's Vercel
+  serverless function is the intentional API exception.

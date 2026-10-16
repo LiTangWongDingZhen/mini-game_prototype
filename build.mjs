@@ -7,6 +7,7 @@
 //   dist/bar_animation/...                           <- animated SVG story
 //   dist/state your requirements clearly/...         <- whip demo (two interpretations)
 //   dist/course notes/...                            <- course notes viewer + markdown
+//   dist/e_egg/...                                   <- Tomori ASCII art easter egg
 //
 // The game is a Next.js app that is statically exported (output: "export")
 // with basePath "/gold_hook", so its HTML references /gold_hook/_next/... and
@@ -73,5 +74,8 @@ for (const lang of ["en", "zh-tw", "zh-cn", "ja", "de", "es"]) {
     recursive: true,
   });
 }
+
+// Tomori ASCII art easter egg (HTML viewer + source txt + reference webp).
+cpSync(path.join(root, "e_egg"), path.join(dist, "e_egg"), { recursive: true });
 
 log("Done. dist/ is ready to deploy.");
