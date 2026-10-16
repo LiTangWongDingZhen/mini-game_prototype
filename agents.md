@@ -26,8 +26,9 @@ with deeper detail. Read the relevant one before editing that piece:
 
 ## Deployment model (important)
 
-The site is deployed as **plain static files** (e.g. on Vercel). There is no
-server at runtime. The build pipeline is:
+The site is deployed primarily as static files (e.g. on Vercel). The course
+notes AI Tutor additionally uses one Vercel serverless function so its
+OpenRouter key stays server-side. The static build pipeline is:
 
 ```
 npm run build          # root package.json → runs node build.mjs
@@ -43,7 +44,8 @@ npm run build          # root package.json → runs node build.mjs
    into `dist/`.
 
 `vercel.json` points Vercel at `buildCommand: npm run build` and
-`outputDirectory: dist`. The result is a single `dist/` folder:
+`outputDirectory: dist`. The static files are assembled in `dist/`; Vercel
+also deploys `api/course-notes-chat.js` as a serverless function:
 
 ```
 dist/
@@ -69,6 +71,9 @@ dist/
   `origin whip/`, `course notes/`) are load-bearing — the links and the build
   copy them verbatim. Don't rename them without updating `index.html` and
   `build.mjs`.
+- Keep the course-notes tutor key in Vercel's `OPENROUTER_API_KEY` environment
+  variable and route browser requests through `api/course-notes-chat.js`. Never
+  expose the key in static files.
 
 ## Commands
 
@@ -97,6 +102,7 @@ index.html                          ← landing page (static, links to everythin
 build.mjs                           ← root build: game export + assemble dist/
 package.json                        ← root scripts (build, typecheck)
 vercel.json                         ← Vercel: buildCommand + outputDirectory
+api/course-notes-chat.js            ← Vercel function for the course-notes tutor
 .gitignore                          ← ignores dist/, node_modules/, build artifacts
 README.md                           ← project readme
 gold_hook/                          ← the game (see gold_hook/AGENTS.md)

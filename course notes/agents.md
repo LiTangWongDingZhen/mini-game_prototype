@@ -10,8 +10,9 @@ subfolders; the viewer fetches the right file, converts it to HTML with a
 built-in (dependency-free) markdown parser, and shows it with a live table of
 contents.
 
-- **Zero external dependencies** — no CDN, no framework, no build step for this
-  file. It is pure HTML + CSS + vanilla JS.
+- The viewer is plain HTML + CSS + vanilla JS with no browser dependencies.
+  Its AI Tutor calls a Vercel serverless function, which keeps the OpenRouter
+  API key on the server.
 - **6 languages × 5 chapters = 30 markdown files**, all with **identical
   filenames** across languages (only the folder differs).
 - Styled to the **PolyU EduGenAI design system** in `recommended style.md`
@@ -81,7 +82,11 @@ Or, after a full build, serve `dist/` and open
 `build.mjs` (repo root) copies `course-notes.html` **and** the six language
 folders into `dist/course notes/`. It deliberately **excludes**
 `recommended style.md` (a design reference, not site content). The landing
-page `index.html` links to `course%20notes/course-notes.html`.
+page `index.html` links to `course%20notes/course-notes.html`. The root-level
+`api/course-notes-chat.js` is deployed by Vercel as `/api/course-notes-chat`;
+set `OPENROUTER_API_KEY` in the Vercel project's Environment Variables. The
+key must not be placed in the HTML, client-side JavaScript, or `dist/`. The
+AI model is fixed in the server function; users cannot select it.
 
 If you rename the folder or add/remove languages, update **all three** of:
 the `CHAPTERS`/language `<select>` in `course-notes.html`, the copy loop in
@@ -92,6 +97,8 @@ the `CHAPTERS`/language `<select>` in `course-notes.html`, the copy loop in
 - **Folder name has a space** (`course notes/`) — it is load-bearing for the
   links and the build. Don't rename it without updating `index.html` and
   `build.mjs`.
+- The AI Tutor requires the Vercel function and `OPENROUTER_API_KEY`; it will
+  not work from a static-only local server. Users do not supply their own key.
 - **`serve` strips `.html`** with a 301 redirect (`course-notes.html` →
   `course-notes`). Browsers follow it transparently; it's not an error.
 - **Some markdown files contain `??` artifacts** (encoding issues in the
