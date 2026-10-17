@@ -692,7 +692,7 @@ async function sendChat() {
         const j = await res.json();
         if (j && j.error && j.error.code === "PROMPT_INJECTION") {
           bubble.className = "msg assistant";
-          bubble.textContent = "Bro, really? This is an learning platform avaliable for CS students, how come you will think i never thought of this?";
+          bubble.textContent = "Bro, really? This is an learning platform avaliable for CS students, how come you will think my developers wont add safeguard against prompt injections?";
           return;
         }
         if (j && j.error && j.error.message) detail = j.error.message;

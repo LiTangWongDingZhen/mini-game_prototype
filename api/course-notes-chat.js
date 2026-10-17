@@ -36,9 +36,71 @@ function normalizeForDetection(text) {
     .replace(/\s+/g, " ");
 }
 
+// Reverse common leet-speak obfuscation so "1gn0re" reads as "ignore".
+function deobfuscate(text) {
+  return text
+    .replace(/0/g, "o")
+    .replace(/1/g, "i")
+    .replace(/3/g, "e")
+    .replace(/4/g, "a")
+    .replace(/5/g, "s")
+    .replace(/7/g, "t")
+    .replace(/@/g, "a")
+    .replace(/\$/g, "s");
+}
+
+function rot13(text) {
+  return text.replace(/[a-zA-Z]/g, (c) => {
+    const base = c <= "Z" ? 65 : 97;
+    return String.fromCharCode(((c.charCodeAt(0) - base + 13) % 26) + base);
+  });
+}
+
+// Heuristic: does a decoded string look like real text rather than binary garbage?
+function looksLikeText(s) {
+  if (!s || s.length < 4) return false;
+  let printable = 0;
+  for (const ch of s) {
+    const code = ch.codePointAt(0);
+    if (code >= 32 && code !== 127) printable++;
+  }
+  return printable / s.length > 0.85;
+}
+
+// Expand an input into the "views" an attacker might hide a payload in:
+// the raw text plus base64 / hex / rot13 / URL-decoded variants. Each view is
+// then run through the same pattern check, so encoded (indirect) injections
+// are caught the same way as plain-text ones.
+function decodePayloads(text) {
+  const candidates = [text];
+  const pushIfText = (decoded) => {
+    if (looksLikeText(decoded)) candidates.push(decoded);
+  };
+
+  // Base64 runs (>= 16 chars so ordinary words don't match).
+  for (const run of text.match(/[A-Za-z0-9+/]{16,}={0,2}/g) || []) {
+    try { pushIfText(Buffer.from(run, "base64").toString("utf8")); } catch (_) {}
+  }
+
+  // Hex runs (even length, >= 16 chars).
+  for (const run of text.match(/\b[0-9a-fA-F]{16,}\b/g) || []) {
+    if (run.length % 2 === 0) {
+      try { pushIfText(Buffer.from(run, "hex").toString("utf8")); } catch (_) {}
+    }
+  }
+
+  // Whole-string reversible transforms.
+  candidates.push(rot13(text));
+  try { pushIfText(decodeURIComponent(text)); } catch (_) {}
+
+  return candidates;
+}
+
 function isPromptInjection(text) {
-  const normalized = normalizeForDetection(text);
-  return PROMPT_INJECTION_PATTERNS.some((pattern) => pattern.test(normalized));
+  return decodePayloads(text).some((candidate) => {
+    const normalized = deobfuscate(normalizeForDetection(candidate));
+    return PROMPT_INJECTION_PATTERNS.some((pattern) => pattern.test(normalized));
+  });
 }
 
 function validateHistory(history) {
