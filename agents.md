@@ -9,7 +9,7 @@ of four self-contained pieces:
 
 | Piece | Path | What it is |
 | --- | --- | --- |
-| Landing page | `index.html` | Static front page linking to everything below |
+| Landing page | `index.html` | Course catalogue entry with footer actions |
 | Course catalogue | `course.html` | Available courses and future course placeholders |
 | COMP5241 overview | `course-overview.html` | Course details, chapter links, and interactive activities |
 | **Gold Rush Hook** | `gold_hook/` | A Gold Miner–style SDLC game (Next.js 15 + Canvas 2D + Zustand) |
@@ -156,3 +156,13 @@ e_egg/                              ← Tomori ASCII art easter egg (HTML + txt)
 - If you change the deployment target (e.g. move the game to the site root),
   update `gold_hook/next.config.mjs` (`basePath`), `build.mjs`, and the
   `gold_hook/` links in `index.html` together.
+
+## Homepage update log
+
+### 2026-10-18
+
+- Simplified the landing page to the course catalogue entry and removed the
+  requested prototype cards, run instructions, and prompt lesson section.
+- Replaced the footer SDLC summary with About Us and Contact Us action buttons.
+- Updated the homepage description and layout styles to reflect the reduced
+  content and centered catalogue card.
