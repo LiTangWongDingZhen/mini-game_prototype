@@ -382,6 +382,14 @@ try {
   if (saved.lang) langSel.value = saved.lang;
 } catch (_) { /* ignore */ }
 
+const requestedChapter = new URLSearchParams(window.location.search).get("chapter");
+if (requestedChapter !== null) {
+  const chapterNumber = Number(requestedChapter);
+  if (Number.isInteger(chapterNumber) && chapterNumber >= 1 && chapterNumber <= CHAPTERS.length) {
+    chapterSel.value = String(chapterNumber - 1);
+  }
+}
+
 function persist() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({ chapter: +chapterSel.value, lang: langSel.value }));

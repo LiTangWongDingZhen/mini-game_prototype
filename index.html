@@ -93,6 +93,7 @@
   .card:hover::before, .card:focus-visible::before{ transform:scaleX(1); }
   .card--gold{ --accent:#B45309; --chip-bg:#FEF3C7; --chip-fg:#B45309; }
   .card--bar{ --accent:#A21942; --chip-bg:#F9E3EB; --chip-fg:#A21942; }
+  .card--catalog{ --accent:#2563EB; --chip-bg:#DBEAFE; --chip-fg:#1D4ED8; }
   .card--notes{ --accent:#047857; --chip-bg:#D1FAE5; --chip-fg:#047857; }
   .card--egg{ --accent:#7C3AED; --chip-bg:#EDE9FE; --chip-fg:#7C3AED; }
 
@@ -180,6 +181,7 @@
 
   .prompt-cards{ display:grid; grid-template-columns:1fr; gap:18px; }
   @media(min-width:840px){ .prompt-cards{ grid-template-columns:1fr 1fr; align-items:stretch; } }
+  .prompt-cards--unified{ grid-template-columns:1fr; }
 
   .pcard{
     position:relative; display:flex; flex-direction:column;
@@ -201,6 +203,7 @@
   .pcard:hover::before, .pcard:focus-visible::before{ transform:scaleX(1); }
   .pcard--origin{ --accent:#B45309; }
   .pcard--polyu{ --accent:#A21942; }
+  .pcard--unified{ --accent:#A21942; }
 
   .pcard-head{ display:flex; align-items:center; gap:14px; margin-bottom:14px; }
   .pcard-num{
@@ -252,18 +255,18 @@
         </span>
         <span class="brand-name">PolyU · GenAI-Powered SE Platform<small>COMP5241 · Mini-Game Prototypes</small></span>
       </div>
-      <span class="brand-right">PROTOTYPE</span>
+      <a class="brand-right" href="course.html">COURSES</a>
     </div>
   </div>
 
   <main class="wrap" style="flex:1;">
     <!-- Hero -->
     <section class="hero">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span> Two interactive prototypes</span>
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span> Courses &amp; interactive prototypes</span>
       <h1>Learn software engineering<br>by <span class="accent">playing</span>.</h1>
-      <p>A pair of gamified prototypes for the PolyU EduGenAI platform — one teaches the
-         Software Development Lifecycle through a hook-and-reel game, the other tells a
-         23-scene comedy about a tester who orders the impossible.</p>
+      <p>Explore course notes and interactive learning demos from the PolyU EduGenAI platform,
+         including an SDLC hook-and-reel game and a 23-scene comedy about a tester who orders
+         the impossible.</p>
     </section>
 
     <!-- Cards -->
@@ -335,6 +338,33 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
           <span>Opens <code>bar_animation/testers-bar-polyu.html</code> — no server needed.</span>
         </p>
+      </a>
+
+      <!-- Course Directory -->
+      <a class="card card--catalog" href="course.html"
+         aria-label="Browse available courses">
+        <div class="card-top">
+          <span class="icon-chip" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"/><path d="M8 7h8"/><path d="M8 10h6"/></svg>
+          </span>
+          <div>
+            <div class="card-kicker">Course Catalogue</div>
+            <h2 class="card-title">Available Courses</h2>
+            <p class="card-sub">1 available · 4 coming soon</p>
+          </div>
+        </div>
+        <p class="card-desc">
+          Browse the available COMP5241 course and its introduction, with four
+          clearly marked placeholders for future courses.
+        </p>
+        <div class="tags">
+          <span class="tag">Course introductions</span>
+          <span class="tag">Future courses</span>
+        </div>
+        <span class="card-cta">
+          Browse courses
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
       </a>
 
       <!-- Course Notes -->
@@ -449,45 +479,26 @@ npm run dev</pre>
 
       <p class="prompt-note">
         The ambiguous phrase is <strong>「一個自行車騎著人往前走」</strong>.
-        Two agents, two readings:
+        Compare both interpretations together in the combined demo:
       </p>
 
-      <div class="prompt-cards">
-        <a class="pcard pcard--origin" href="state your requirements clearly/origin whip/origin whip.html" target="_blank" rel="noopener"
-           aria-label="Open origin whip.html — the first interpretation">
+      <div class="prompt-cards prompt-cards--unified">
+        <a class="pcard pcard--unified" href="state your requirements clearly/whip.html"
+           aria-label="Compare both interpretations in the combined whip demo">
           <div class="pcard-head">
             <span class="pcard-num" aria-hidden="true">1</span>
             <div>
-              <div class="pcard-kicker">First interpretation</div>
-              <h3 class="pcard-title">鵜鶘鞭打騎車人</h3>
+              <div class="pcard-kicker">Side-by-side comparison</div>
+              <h3 class="pcard-title">Two Whip Demo Interpretations</h3>
             </div>
           </div>
           <p class="pcard-desc">
-            The agent read it the "normal" way: a <strong>person riding a bicycle</strong>
-            going forward, with a pelican behind whipping him.
+            See both original animations on one page: a <strong>person riding a bicycle</strong>
+            and a <strong>bicycle riding on top of a person</strong>. Compare how clarification
+            changes the generated result.
           </p>
           <span class="pcard-cta">
-            Open origin whip.html
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </span>
-        </a>
-
-        <a class="pcard pcard--polyu" href="state your requirements clearly/polyu-style/whip_pelican.html" target="_blank" rel="noopener"
-           aria-label="Open whip_pelican.html — the second interpretation">
-          <div class="pcard-head">
-            <span class="pcard-num" aria-hidden="true">2</span>
-            <div>
-              <div class="pcard-kicker">Second interpretation</div>
-              <h3 class="pcard-title">自行車騎著人 × 鵜鶘甩鞭</h3>
-            </div>
-          </div>
-          <p class="pcard-desc">
-            Re-prompted with the same phrase, the agent read it literally: a
-            <strong>bicycle riding on top of a person</strong>, who pumps his limbs to
-            lurch forward while a pelican whips him.
-          </p>
-          <span class="pcard-cta">
-            Open whip_pelican.html
+            Compare both interpretations
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </span>
         </a>

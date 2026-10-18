@@ -3,9 +3,11 @@
 //
 // Layout produced in dist/:
 //   dist/index.html                                  <- landing page
+//   dist/course.html                                 <- course catalogue
+//   dist/course-overview.html                        <- COMP5241 overview + resources
 //   dist/gold_hook/...                               <- Next.js game (static export)
 //   dist/bar_animation/...                           <- animated SVG story
-//   dist/state your requirements clearly/...         <- whip demo (two interpretations)
+//   dist/state your requirements clearly/...         <- unified comparison + source demos
 //   dist/course notes/...                            <- course notes viewer + markdown
 //   dist/e_egg/...                                   <- Tomori ASCII art easter egg
 //
@@ -43,8 +45,13 @@ log("Assembling dist/ ...");
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 
-// Landing page.
+// Root HTML pages.
 cpSync(path.join(root, "index.html"), path.join(dist, "index.html"));
+cpSync(path.join(root, "course.html"), path.join(dist, "course.html"));
+cpSync(
+  path.join(root, "course-overview.html"),
+  path.join(dist, "course-overview.html"),
+);
 
 // Game -> dist/gold_hook (basePath is /gold_hook).
 cpSync(outDir, path.join(dist, "gold_hook"), { recursive: true });

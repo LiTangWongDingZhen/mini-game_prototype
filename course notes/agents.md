@@ -63,6 +63,9 @@ Or, after a full build, serve `dist/` and open
 2. **Chapter + language dropdowns.** Chapter list is hard-coded in `CHAPTERS`
    (filename + label); the language `<select>` options are in the markup.
    Changing either dropdown triggers `load()`.
+   The optional `?chapter=1` through `?chapter=5` URL parameter selects a chapter
+   on arrival and takes precedence over the saved chapter. The COMP5241 overview
+   uses these links for its chapter guide.
 3. **Request race guard.** `load()` bumps a `loadSeq` token; after the `await`,
    it discards the result if a newer load has started. This stops a slow
    response from an earlier selection from overwriting a newer one when the
@@ -81,12 +84,13 @@ Or, after a full build, serve `dist/` and open
 
 `build.mjs` (repo root) copies `course-notes.html` **and** the six language
 folders into `dist/course notes/`. It deliberately **excludes**
-`recommended style.md` (a design reference, not site content). The landing
-page `index.html` links to `course%20notes/course-notes.html`. The root-level
-`api/course-notes-chat.js` is deployed by Vercel as `/api/course-notes-chat`;
-set `OPENROUTER_API_KEY` in the Vercel project's Environment Variables. The
-key must not be placed in the HTML, client-side JavaScript, or `dist/`. The
-AI model is fixed in the server function; users cannot select it.
+`recommended style.md` (a design reference, not site content). The
+`course-overview.html` page links to `course%20notes/course-notes.html`; the
+root-level `api/course-notes-chat.js` is deployed by Vercel as
+`/api/course-notes-chat`. Set `OPENROUTER_API_KEY` in the Vercel project's
+Environment Variables. The key must not be placed in the HTML, client-side
+JavaScript, or `dist/`. The AI model is fixed in the server function; users
+cannot select it.
 
 If you rename the folder or add/remove languages, update **all three** of:
 the `CHAPTERS`/language `<select>` in `course-notes.html`, the copy loop in
