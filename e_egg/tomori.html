@@ -90,10 +90,15 @@
     padding: .4rem .55rem .4rem .95rem;
   }
   .music-dock .music-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; color: #6b7280; text-transform: uppercase; }
+  .music-dock .music-hint { max-width: 16rem; color: #4b5563; font-size: .72rem; line-height: 1.35; }
   .music-dock .btn { border-radius: 999px; padding: .35rem .65rem; display: inline-flex; align-items: center; gap: .35rem; }
   .music-dock .btn svg { width: 1rem; height: 1rem; }
   .music-dock .btn.active { background: var(--polyu); border-color: var(--polyu); color: #fff; }
-  .yt-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+  @media (max-width: 560px) {
+    .music-dock { right: .5rem; bottom: .5rem; left: .5rem; justify-content: space-between; gap: .4rem; padding: .55rem .7rem; }
+    .music-dock .music-hint { flex: 1; max-width: none; }
+  }
+  .yt-hidden { position: fixed; top: 0; left: -10000px; width: 200px; height: 200px; overflow: hidden; opacity: 0; pointer-events: none; }
 
   /* ── States ─────────────────────────────────────────────── */
   .state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; min-height: 14rem; text-align: center; padding: 2rem; }
@@ -155,6 +160,7 @@
 <div class="yt-hidden" id="ytPlayer" aria-hidden="true"></div>
 <div class="music-dock" id="musicDock" role="group" aria-label="Background music">
   <span class="music-label">Music</span>
+  <span class="music-hint" id="musicHint" role="status">If music doesn't start, press Play.</span>
   <button class="btn" id="musicBtn" aria-pressed="false" title="Play / pause background music">
     <svg id="musicIconPlay" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
     <svg id="musicIconPause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
@@ -291,6 +297,7 @@ const musicBtn = document.getElementById("musicBtn");
 const musicIconPlay = document.getElementById("musicIconPlay");
 const musicIconPause = document.getElementById("musicIconPause");
 const musicText = document.getElementById("musicText");
+const musicHint = document.getElementById("musicHint");
 let ytPlayer = null;
 let musicPlaying = false;
 
@@ -304,13 +311,15 @@ function setMusicUI(playing) {
 }
 
 function startMusic() {
-  if (!ytPlayer) return;
+  if (!ytPlayer) {
+    musicHint.textContent = "The music player is still loading. Try Play again shortly.";
+    return;
+  }
   ytPlayer.playVideo();
 }
 
 function onPlayerReady() {
-  // Try to start on load; browsers usually block autoplay with sound, in
-  // which case the dock stays on "Play" and the user starts it with a click.
+  musicHint.textContent = "If music doesn't start, press Play.";
   ytPlayer.playVideo();
 }
 
@@ -318,13 +327,18 @@ function onPlayerStateChange(event) {
   setMusicUI(event.data === 1 /* YT.PlayerState.PLAYING */);
 }
 
+function onAutoplayBlocked() {
+  musicHint.textContent = "Your browser blocked autoplay. Press Play to start the music.";
+}
+
 function loadYouTubeAPI() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (window.YT && window.YT.Player) { resolve(); return; }
     const prev = window.onYouTubeIframeAPIReady;
     window.onYouTubeIframeAPIReady = () => { if (prev) prev(); resolve(); };
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
+    tag.onerror = () => reject(new Error("YouTube Player API failed to load."));
     document.head.appendChild(tag);
   });
 }
@@ -334,14 +348,19 @@ async function initMusic() {
     await loadYouTubeAPI();
     ytPlayer = new YT.Player("ytPlayer", {
       videoId: YT_VIDEO_ID,
-      width: "1",
-      height: "1",
-      playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1, rel: 0 },
-      events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange },
+      width: "200",
+      height: "200",
+      playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1, rel: 0, origin: location.origin },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange,
+        onAutoplayBlocked,
+        onError: () => { musicHint.textContent = "Music could not be loaded. Check your connection and try again."; },
+      },
     });
   } catch (err) {
-    // No network / API blocked — hide the dock rather than show a dead control.
-    document.getElementById("musicDock").style.display = "none";
+    musicHint.textContent = "Music could not be loaded. Check your connection and try again.";
+    musicBtn.disabled = true;
   }
 }
 
