@@ -6,6 +6,8 @@ self-contained pieces:
 | Piece | Path | What it is |
 | --- | --- | --- |
 | 🏠 Landing page | `index.html` | Static front page that links to everything below |
+| 📚 Course catalogue | [`course.html`](./course.html) | Available courses with a detailed COMP5241 overview |
+| 🧭 COMP5241 overview | [`course-overview.html`](./course-overview.html) | Course summary, chapter guide, and linked activities |
 | ⛏️ **Gold Rush Hook** | [`gold_hook/`](./gold_hook) | A Gold Miner–style **SDLC learning game** (Next.js 15 + Canvas 2D + Zustand) |
 | 🍺 Testers & the Bar | [`bar_animation/`](./bar_animation) | A 23-scene **animated SVG story** (single HTML file) |
 | 🪶 Whip demo | [`state your requirements clearly/`](./state%20your%20requirements%20clearly) | Two HTML interpretations of one prompt — a lesson in **prompt precision** |
@@ -46,8 +48,11 @@ agent:
 - **`polyu-style/whip_pelican.html`** — the result after the specific phrase
   **「一個自行車騎著人往前走」** was re-prompted on top of the first result.
 
-Compare the two to see how re-stating a single phrase changes the output. The
-landing page's **"Prompt precision lesson"** section links both.
+[`state your requirements clearly/whip.html`](./state%20your%20requirements%20clearly/whip.html)
+embeds both animations side by side so the two interpretations can be compared
+on one page. Each demo can still be opened separately from the comparison page.
+The landing page's **"Prompt precision lesson"** and COMP5241 overview both link
+to this unified comparison.
 
 ---
 
@@ -79,6 +84,7 @@ Open the `.html` files directly in any modern browser (Chrome / Edge) — no bui
 step:
 
 - `bar_animation/testers-bar-polyu.html`
+- `state your requirements clearly/whip.html`
 - `state your requirements clearly/origin whip/origin whip.html`
 - `state your requirements clearly/polyu-style/whip_pelican.html`
 
@@ -104,9 +110,11 @@ serverless function to keep its OpenRouter API key out of the browser.
    not add the key to frontend files or commit it to the repository.
 5. Deploy. The result is served as:
    - `/` — landing page
+   - `/course.html` — available courses and future course placeholders
+   - `/course-overview.html` — COMP5241 overview, chapter guide, and activities
    - `/gold_hook/` — the game
    - `/bar_animation/testers-bar-polyu.html` — the bar story
-   - `/state your requirements clearly/...` — the whip demo
+   - `/state your requirements clearly/whip.html` — side-by-side whip-demo comparison
    - `/course notes/course-notes.html` — the course notes viewer
    - `/e_egg/tomori.html` — the Tomori ASCII art easter egg
 
@@ -117,7 +125,7 @@ serverless function to keep its OpenRouter API key out of the browser.
 1. Installs + builds the Next.js game as a **static export**
    (`output: "export"`, `basePath: "/gold_hook"` in
    [`gold_hook/next.config.mjs`](./gold_hook/next.config.mjs)) → `gold_hook/out/`.
-2. Copies `index.html` → `dist/index.html`.
+2. Copies `index.html`, `course.html`, and `course-overview.html` to the root of `dist/`.
 3. Copies `gold_hook/out/` → `dist/gold_hook/`, plus the two demo folders, into
    `dist/`.
 4. Copies the course notes viewer (`course-notes.html` + the six language
@@ -143,6 +151,8 @@ site works from any host.
 ```
 .
 ├── index.html                          # landing page (static, links to everything)
+├── course.html                         # course catalogue
+├── course-overview.html                # COMP5241 course detail and activity links
 ├── build.mjs                           # root build: game export + assemble dist/
 ├── package.json                        # root scripts (build, typecheck)
 ├── vercel.json                         # Vercel: buildCommand + outputDirectory
@@ -156,6 +166,7 @@ site works from any host.
 ├── bar_animation/                      # animated SVG story — see bar_animation/agents.md
 │   └── testers-bar-polyu.html
 ├── state your requirements clearly/    # whip demo — two interpretations
+│   ├── whip.html                       # unified side-by-side comparison
 │   ├── origin whip/
 │   │   └── origin whip.html
 │   └── polyu-style/

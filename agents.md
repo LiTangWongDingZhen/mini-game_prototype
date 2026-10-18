@@ -10,9 +10,11 @@ of four self-contained pieces:
 | Piece | Path | What it is |
 | --- | --- | --- |
 | Landing page | `index.html` | Static front page linking to everything below |
+| Course catalogue | `course.html` | Available courses and future course placeholders |
+| COMP5241 overview | `course-overview.html` | Course details, chapter links, and interactive activities |
 | **Gold Rush Hook** | `gold_hook/` | A Gold Miner–style SDLC game (Next.js 15 + Canvas 2D + Zustand) |
 | Testers & the Bar | `bar_animation/` | A 23-scene animated SVG story (single HTML file) |
-| Whip demo | `state your requirements clearly/` | Two HTML interpretations of one prompt (a lesson in prompt precision) |
+| Whip demo | `state your requirements clearly/` | Unified side-by-side comparison of two prompt interpretations |
 | Course notes | `course notes/` | A self-contained viewer for the COMP5241 notes (5 chapters × 6 languages) |
 | Tomori easter egg | `e_egg/` | A colored ASCII-art viewer of Tomori (single HTML file + source txt) |
 
@@ -40,7 +42,7 @@ npm run build          # root package.json → runs node build.mjs
 1. Installs + builds the Next.js game (`gold_hook/`) as a **static export**
    (`output: "export"`, `basePath: "/gold_hook"` in `gold_hook/next.config.mjs`),
    producing `gold_hook/out/`.
-2. Copies `index.html` → `dist/index.html`.
+2. Copies `index.html`, `course.html`, and `course-overview.html` to the root of `dist/`.
 3. Copies `gold_hook/out/` → `dist/gold_hook/`, plus the two demo folders,
    into `dist/`.
 
@@ -51,6 +53,8 @@ also deploys `api/course-notes-chat.js` as a serverless function:
 ```
 dist/
   index.html
+  course.html                          ← course catalogue
+  course-overview.html                 ← course detail, chapters, and activities
   gold_hook/...                       ← game (served at /gold_hook/)
   bar_animation/...
   state your requirements clearly/...
@@ -101,6 +105,8 @@ browser, and (for the game) exercising the phase machine.
 
 ```
 index.html                          ← landing page (static, links to everything)
+course.html                         ← course catalogue and future course placeholders
+course-overview.html                ← COMP5241 course overview and activities
 build.mjs                           ← root build: game export + assemble dist/
 package.json                        ← root scripts (build, typecheck)
 vercel.json                         ← Vercel: buildCommand + outputDirectory
@@ -124,8 +130,9 @@ e_egg/                              ← Tomori ASCII art easter egg (HTML + txt)
 - Follow each subfolder's own `agents.md`/`AGENTS.md` conventions when
   editing that piece (the game has a strict PolyU design system — see
   `gold_hook/EDUGENAI-README.md`).
-- Keep the "prompt precision lesson" section's two demo links pointing at the
-  real files (`origin whip/origin whip.html`, `polyu-style/whip_pelican.html`).
+- Keep the "prompt precision lesson" linking to `state your requirements clearly/whip.html`;
+  that comparison page embeds the two original demos (`origin whip/origin whip.html`,
+  `polyu-style/whip_pelican.html`).
 
 ## Agent rules — don't
 
@@ -143,8 +150,9 @@ e_egg/                              ← Tomori ASCII art easter egg (HTML + txt)
 - The whip demo exists to teach that **concise, unambiguous prompts matter**:
   `origin whip.html` is the first (loose) interpretation of the prompt, and
   `whip_pelican.html` is the result after re-prompting the specific phrase
-  "一個自行車騎著人往前走". The landing page's "Prompt precision lesson"
-  section explains this.
+  "一個自行車騎著人往前走". `state your requirements clearly/whip.html`
+  presents both animations side by side; link to that unified comparison from
+  the landing page and course overview.
 - If you change the deployment target (e.g. move the game to the site root),
   update `gold_hook/next.config.mjs` (`basePath`), `build.mjs`, and the
   `gold_hook/` links in `index.html` together.
