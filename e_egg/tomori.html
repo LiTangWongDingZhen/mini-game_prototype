@@ -89,6 +89,27 @@
     box-shadow: 0 6px 20px rgba(0,0,0,.14);
     padding: .4rem .55rem .4rem .95rem;
   }
+  .music-status { display: none; color: #6b7280; font-size: .72rem; }
+  .music-status.is-visible { display: inline; }
+  .unmute-btn {
+    display: none;
+    border: 1px solid var(--polyu);
+    background: var(--polyu);
+    color: #fff;
+    border-radius: 999px;
+    padding: .35rem .7rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    cursor: pointer;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .unmute-btn.is-visible { display: inline-flex; align-items: center; gap: .3rem; }
+  .unmute-btn svg { width: .9rem; height: .9rem; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(162, 25, 66, .5); }
+    50% { box-shadow: 0 0 0 6px rgba(162, 25, 66, 0); }
+  }
   .music-dock .music-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; color: #6b7280; text-transform: uppercase; }
   .music-dock .btn { border-radius: 999px; padding: .35rem .65rem; display: inline-flex; align-items: center; gap: .35rem; }
   .music-dock .btn svg { width: 1rem; height: 1rem; }
@@ -155,6 +176,11 @@
 <div class="yt-hidden" id="ytPlayer" aria-hidden="true"></div>
 <div class="music-dock" id="musicDock" role="group" aria-label="Background music">
   <span class="music-label">Music</span>
+  <span class="music-status" id="musicStatus" role="status"></span>
+  <button class="unmute-btn" id="unmuteBtn" title="Turn on the music sound">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+    <span>Enable Sound</span>
+  </button>
   <button class="btn" id="musicBtn" aria-pressed="false" title="Play / pause background music">
     <svg id="musicIconPlay" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
     <svg id="musicIconPause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
@@ -291,8 +317,12 @@ const musicBtn = document.getElementById("musicBtn");
 const musicIconPlay = document.getElementById("musicIconPlay");
 const musicIconPause = document.getElementById("musicIconPause");
 const musicText = document.getElementById("musicText");
+const musicStatus = document.getElementById("musicStatus");
+const unmuteBtn = document.getElementById("unmuteBtn");
+const autoplayRequested = new URLSearchParams(window.location.search).get("autoplay") !== "0";
 let ytPlayer = null;
 let musicPlaying = false;
+let soundEnabled = false;
 
 function setMusicUI(playing) {
   musicPlaying = playing;
@@ -301,17 +331,44 @@ function setMusicUI(playing) {
   musicIconPlay.style.display = playing ? "none" : "block";
   musicIconPause.style.display = playing ? "block" : "none";
   musicText.textContent = playing ? "Pause" : "Play";
+  if (playing) {
+    musicStatus.textContent = "";
+    musicStatus.classList.remove("is-visible");
+  }
+}
+
+function showUnmutePrompt() {
+  if (soundEnabled) return;
+  unmuteBtn.classList.add("is-visible");
+  musicStatus.textContent = "Playing muted — click Enable Sound";
+  musicStatus.classList.add("is-visible");
+}
+
+function enableSound() {
+  if (!ytPlayer) return;
+  ytPlayer.unMute();
+  soundEnabled = true;
+  unmuteBtn.classList.remove("is-visible");
+  musicStatus.textContent = "";
+  musicStatus.classList.remove("is-visible");
 }
 
 function startMusic() {
   if (!ytPlayer) return;
+  if (!soundEnabled) {
+    // A user gesture is the perfect moment to turn the sound on.
+    enableSound();
+  }
   ytPlayer.playVideo();
 }
 
 function onPlayerReady() {
-  // Try to start on load; browsers usually block autoplay with sound, in
-  // which case the dock stays on "Play" and the user starts it with a click.
+  if (!autoplayRequested) return;
+  // Browsers block audible autoplay, but allow muted autoplay.
+  // Start muted so the video plays immediately, then prompt to unmute.
+  ytPlayer.mute();
   ytPlayer.playVideo();
+  showUnmutePrompt();
 }
 
 function onPlayerStateChange(event) {
@@ -336,12 +393,22 @@ async function initMusic() {
       videoId: YT_VIDEO_ID,
       width: "1",
       height: "1",
-      playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1, rel: 0 },
-      events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange },
+      playerVars: {
+        autoplay: autoplayRequested ? 1 : 0,
+        controls: 0,
+        disablekb: 1,
+        playsinline: 1,
+        rel: 0,
+      },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange,
+        onAutoplayBlocked: showUnmutePrompt,
+      },
     });
   } catch (err) {
-    // No network / API blocked — hide the dock rather than show a dead control.
-    document.getElementById("musicDock").style.display = "none";
+    musicStatus.textContent = "Audio unavailable";
+    musicStatus.classList.add("is-visible");
   }
 }
 
@@ -350,6 +417,8 @@ musicBtn.addEventListener("click", () => {
   if (musicPlaying) ytPlayer.pauseVideo();
   else startMusic();
 });
+
+unmuteBtn.addEventListener("click", enableSound);
 
 initMusic();
 
